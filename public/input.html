@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Input Form</title>
+</head>
+<body>
+  <h3>Store Input</h3>
+  <form id="inputForm">
+    <input type="text" name="input" id="inputField" placeholder="Enter something" required>
+    <button type="submit">Submit</button>
+  </form>
+  <pre id="result"></pre>
+  <script>
+    document.getElementById('inputForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('inputField').value;
+      const res = await fetch('/api/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input })
+      });
+      const data = await res.json();
+      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+      document.getElementById('inputField').value = '';
+    });
+  </script>
+</body>
+</html>

