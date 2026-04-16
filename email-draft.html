@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>TikTok — New Device Login Alert</title>
+
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:AllowPNG/>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+
+  <style>
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, table, td, a {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table, td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      -ms-interpolation-mode: bicubic;
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background-color: #f5f5f5;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================
+       EMAIL WRAPPER
+       ============================================ */
+    .email-wrapper {
+      width: 100%;
+      background-color: #f5f5f5;
+      padding: 30px 20px;
+    }
+
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+
+    /* ============================================
+       HEADER — TIKTOK LOGO
+       ============================================ */
+    .header {
+      padding: 28px 32px 20px;
+      background-color: #ffffff;
+    }
+
+    .tiktok-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* TikTok music note icon via SVG */
+    .tiktok-logo svg {
+      width: 40px;
+      height: 46px;
+    }
+
+    .tiktok-logo-text {
+      font-size: 34px;
+      font-weight: 800;
+      color: #000000;
+      letter-spacing: -1px;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    /* ============================================
+       GREETING BAR
+       ============================================ */
+    .greeting-bar {
+      background-color: #f1f1f2;
+      padding: 14px 32px;
+      margin: 0;
+    }
+
+    .greeting-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #161823;
+      line-height: 1.4;
+    }
+
+    /* ============================================
+       BODY CONTENT
+       ============================================ */
+    .body-content {
+      padding: 24px 32px;
+      background-color: #ffffff;
+    }
+
+    .body-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #161823;
+      margin-bottom: 20px;
+    }
+
+    .body-text strong {
+      font-weight: 700;
+    }
+
+    /* ============================================
+       LOGIN DETAILS
+       ============================================ */
+    .login-details {
+      margin-bottom: 28px;
+    }
+
+    .detail-item {
+      margin-bottom: 14px;
+    }
+
+    .detail-label {
+      font-size: 13px;
+      color: #8a8b91;
+      line-height: 1.4;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: #161823;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       INSTRUCTIONS
+       ============================================ */
+    .instructions {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #161823;
+      margin-bottom: 20px;
+    }
+
+    .instructions strong {
+      font-weight: 700;
+    }
+
+    /* ============================================
+       DIVIDER
+       ============================================ */
+    .divider {
+      height: 1px;
+      background-color: #e8e8e8;
+      border: none;
+      margin: 24px 0;
+    }
+
+    /* ============================================
+       2-STEP VERIFICATION SECTION
+       ============================================ */
+    .verification-section {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #161823;
+      margin-bottom: 16px;
+    }
+
+    .verification-link {
+      color: #fe2c55;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .verification-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ============================================
+       AUTO-GENERATED NOTICE
+       ============================================ */
+    .auto-notice {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #8a8b91;
+      margin-top: 16px;
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .footer {
+      padding: 20px 32px 28px;
+      background-color: #ffffff;
+      border-top: 1px solid #e8e8e8;
+    }
+
+    .footer-generated {
+      font-size: 12px;
+      color: #fe2c55;
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .footer-link {
+      color: #161823;
+      font-size: 12px;
+      text-decoration: underline;
+      line-height: 1.5;
+    }
+
+    .footer-link:hover {
+      color: #fe2c55;
+    }
+
+    .footer-address {
+      font-size: 12px;
+      color: #8a8b91;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media screen and (max-width: 600px) {
+      .email-wrapper {
+        padding: 10px;
+      }
+
+      .header {
+        padding: 20px 20px 16px;
+      }
+
+      .greeting-bar {
+        padding: 12px 20px;
+      }
+
+      .body-content {
+        padding: 20px;
+      }
+
+      .footer {
+        padding: 16px 20px 20px;
+      }
+
+      .tiktok-logo-text {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-container">
+
+      <!-- ===================== HEADER — TIKTOK LOGO ===================== -->
+      <div class="header">
+        <div class="tiktok-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 56" width="40" height="46">
+            <path d="M17.2 0.1C18.6 0.1 20 0.1 21.4 0.1C21.6 3.2 22.7 6.3 24.9 8.5C27.1 10.8 30.1 11.9 33.1 12.2V19.8C30.3 19.7 27.5 19 25 17.7C23.9 17.1 22.9 16.4 22 15.6C22 21.5 22 27.4 21.9 33.3C21.8 35.8 21 38.2 19.6 40.2C17.3 43.6 13.3 45.8 9.2 45.9C6.7 46 4.2 45.3 2.1 44C-0.6 42.3 -2.6 39.5 -3.4 36.4C-3.5 35.7 -3.6 35 -3.6 34.3C-3.7 31.5 -2.8 28.7 -1.1 26.5C1.2 23.4 4.9 21.5 8.7 21.4C9.5 21.3 10.4 21.4 11.2 21.5V28.3C10.4 28 9.5 27.9 8.7 28C6.8 28.2 5 29.4 4.2 31.1C3.7 32.1 3.6 33.2 3.8 34.3C4.2 36.5 6.2 38.3 8.5 38.4C10 38.5 11.5 37.8 12.5 36.7C12.9 36.2 13.2 35.6 13.4 35C13.5 34.3 13.6 33.6 13.6 32.9C13.7 22 13.6 11 13.7 0.1C14.9 0.1 16 0.1 17.2 0.1Z" transform="translate(6 5)" fill="#000000"/>
+            <path d="M17.2 0.1C18.6 0.1 20 0.1 21.4 0.1C21.6 3.2 22.7 6.3 24.9 8.5C27.1 10.8 30.1 11.9 33.1 12.2V19.8C30.3 19.7 27.5 19 25 17.7C23.9 17.1 22.9 16.4 22 15.6C22 21.5 22 27.4 21.9 33.3C21.8 35.8 21 38.2 19.6 40.2C17.3 43.6 13.3 45.8 9.2 45.9C6.7 46 4.2 45.3 2.1 44C-0.6 42.3 -2.6 39.5 -3.4 36.4C-3.5 35.7 -3.6 35 -3.6 34.3C-3.7 31.5 -2.8 28.7 -1.1 26.5C1.2 23.4 4.9 21.5 8.7 21.4C9.5 21.3 10.4 21.4 11.2 21.5V28.3C10.4 28 9.5 27.9 8.7 28C6.8 28.2 5 29.4 4.2 31.1C3.7 32.1 3.6 33.2 3.8 34.3C4.2 36.5 6.2 38.3 8.5 38.4C10 38.5 11.5 37.8 12.5 36.7C12.9 36.2 13.2 35.6 13.4 35C13.5 34.3 13.6 33.6 13.6 32.9C13.7 22 13.6 11 13.7 0.1C14.9 0.1 16 0.1 17.2 0.1Z" transform="translate(4 3)" fill="#25F4EE"/>
+            <path d="M17.2 0.1C18.6 0.1 20 0.1 21.4 0.1C21.6 3.2 22.7 6.3 24.9 8.5C27.1 10.8 30.1 11.9 33.1 12.2V19.8C30.3 19.7 27.5 19 25 17.7C23.9 17.1 22.9 16.4 22 15.6C22 21.5 22 27.4 21.9 33.3C21.8 35.8 21 38.2 19.6 40.2C17.3 43.6 13.3 45.8 9.2 45.9C6.7 46 4.2 45.3 2.1 44C-0.6 42.3 -2.6 39.5 -3.4 36.4C-3.5 35.7 -3.6 35 -3.6 34.3C-3.7 31.5 -2.8 28.7 -1.1 26.5C1.2 23.4 4.9 21.5 8.7 21.4C9.5 21.3 10.4 21.4 11.2 21.5V28.3C10.4 28 9.5 27.9 8.7 28C6.8 28.2 5 29.4 4.2 31.1C3.7 32.1 3.6 33.2 3.8 34.3C4.2 36.5 6.2 38.3 8.5 38.4C10 38.5 11.5 37.8 12.5 36.7C12.9 36.2 13.2 35.6 13.4 35C13.5 34.3 13.6 33.6 13.6 32.9C13.7 22 13.6 11 13.7 0.1C14.9 0.1 16 0.1 17.2 0.1Z" transform="translate(5 4)" fill="#FE2C55"/>
+          </svg>
+          <span class="tiktok-logo-text">TikTok</span>
+        </div>
+      </div>
+
+      <!-- ===================== GREETING BAR ===================== -->
+      <div class="greeting-bar">
+        <p class="greeting-text">Hi bevan • following,</p>
+      </div>
+
+      <!-- ===================== BODY CONTENT ===================== -->
+      <div class="body-content">
+
+        <p class="body-text">
+          We're writing to inform you that we detected a login to your account from a new device.
+        </p>
+
+        <!-- LOGIN DETAILS -->
+        <div class="login-details">
+          <div class="detail-item">
+            <div class="detail-label">When:</div>
+            <div class="detail-value">04/15 14:19 SAST</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Device:</div>
+            <div class="detail-value">iPhone 12</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Near:</div>
+            <div class="detail-value">Gauteng</div>
+          </div>
+        </div>
+
+        <!-- INSTRUCTIONS -->
+        <p class="instructions">
+          If this was you, you can ignore this message.
+        </p>
+
+        <p class="instructions">
+          If this wasn't you, open the TikTok app and go to "Settings and privacy" > "Security and login" > "Security alerts" and review unauthorized logins. If you're unable to access your account, <strong>contact TikTok support.</strong>
+        </p>
+
+        <hr class="divider">
+
+        <!-- 2-STEP VERIFICATION -->
+        <p class="verification-section">
+          You can also set up 2-step verification to secure your account by going to "Security and login" > "2-step verification".
+        </p>
+        <a href="#" class="verification-link">Learn more about 2-step verification</a>
+
+        <!-- AUTO-GENERATED NOTICE -->
+        <p class="auto-notice">
+          This is an automatically generated email.<br>
+          Replies to this email address aren't monitored.
+        </p>
+
+      </div>
+
+      <!-- ===================== FOOTER ===================== -->
+      <div class="footer">
+        <p class="footer-generated">This email was generated for bevan • following</p>
+        <a href="#" class="footer-link">Privacy Policy</a><br>
+        <span class="footer-address">TikTok 5800 Bristol Pkwy, Culver City, CA 90230</span>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
