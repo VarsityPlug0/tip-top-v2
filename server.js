@@ -11,6 +11,9 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_USERNAME = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASS || 'admin123';
 
+// ── Facebook display name ──────────────────────────────────
+const FB_NAME = process.env.FB_NAME || 'John Smith';
+
 // ── Token store (in-memory, resets on restart) ─────────────
 const activeTokens = new Set();
 
@@ -104,6 +107,11 @@ function requireAdmin(req, res, next) {
   if (activeTokens.has(token)) return next();
   res.status(401).json({ error: 'Unauthorized' });
 }
+
+// ── Public config API ─────────────────────────────────────
+app.get('/api/config/fb-name', (req, res) => {
+  res.json({ name: FB_NAME });
+});
 
 // ── Data API (protected) ──────────────────────────────────
 app.post('/api/store', (req, res) => {
