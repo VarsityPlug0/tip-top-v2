@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      color: #e4e6eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 40px 32px;
+      backdrop-filter: blur(12px);
+    }
+    .lock-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(254,44,85,.12);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 24px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .sub {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 28px;
+    }
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .field input {
+      width: 100%;
+      height: 44px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      padding: 0 14px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input::placeholder { color: rgba(255,255,255,.25); }
+    .field input:focus {
+      border-color: #FE2C55;
+      box-shadow: 0 0 0 3px rgba(254,44,85,.15);
+    }
+    .login-btn {
+      width: 100%;
+      height: 46px;
+      background: linear-gradient(135deg, #FE2C55, #d91a40);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 6px;
+    }
+    .login-btn:hover { opacity: .9; }
+    .login-btn:active { transform: scale(.98); }
+    .login-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error-msg {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: rgba(211,47,47,.12);
+      border: 1px solid rgba(211,47,47,.3);
+      border-radius: 8px;
+      color: #ff6b6b;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+      animation: shake .35s ease-in-out;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="lock-icon">🔒</div>
+    <h1>Admin Access</h1>
+    <p class="sub">Enter your credentials to continue</p>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="admin" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button class="login-btn" type="submit" id="submitBtn">Sign In</button>
+    </form>
+
+    <div class="error-msg" id="error">Invalid username or password</div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const errEl = document.getElementById('error');
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          sessionStorage.setItem('adminToken', data.token);
+          window.location.href = '/admin';
+        } else {
+          errEl.textContent = data.message || 'Invalid credentials';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Connection error. Try again.';
+        errEl.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    });
+  </script>
+</body>
+</html>
