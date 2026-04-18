@@ -2,9 +2,11 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const emailSender = require('./email-sender');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
 // ── Admin credentials (change these!) ──────────────────────
@@ -136,6 +138,86 @@ app.get('/api/clear', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
+// ── Email Composer Page ────────────────────────────────────
+app.get('/admin/email', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'email-composer.html'));
+});
+
+// ── Email API Routes ──────────────────────────────────────
+
+// Get SMTP config (redacted)
+app.get('/api/email/config', requireAdmin, (req, res) => {
+  res.json(emailSender.getConfig());
+});
+
+// Update SMTP config
+app.post('/api/email/config', requireAdmin, (req, res) => {
+  const updated = emailSender.updateConfig(req.body);
+  res.json({ success: true, config: updated });
+});
+
+// Verify SMTP connection
+app.post('/api/email/verify', requireAdmin, async (req, res) => {
+  const result = await emailSender.verifyConnection();
+  res.json(result);
+});
+
+// Send single email
+app.post('/api/email/send', requireAdmin, async (req, res) => {
+  const { to, recipientName, loginDate, loginTime, timezone, device, location, subject, customHtml, ...templateData } = req.body;
+
+  if (!to) return res.status(400).json({ success: false, error: 'Recipient email is required' });
+
+  let result;
+  if (customHtml) {
+    result = await emailSender.sendEmail({ to, subject: subject || 'TikTok Security Alert', html: customHtml });
+  } else {
+    result = await emailSender.sendTikTokAlert({ to, recipientName, loginDate, loginTime, timezone, device, location, ...templateData, baseUrl: BASE_URL });
+  }
+  
+  // Log sent email
+  const logFile = path.join(__dirname, 'email-log.json');
+  let logs = [];
+  if (fs.existsSync(logFile)) {
+    try { logs = JSON.parse(fs.readFileSync(logFile, 'utf8')); } catch(e) { logs = []; }
+  }
+  logs.push({ to, recipientName, subject, success: result.success, messageId: result.messageId, error: result.error, timestamp: new Date().toISOString() });
+  fs.writeFileSync(logFile, JSON.stringify(logs, null, 2));
+
+  res.json(result);
+});
+
+// Send bulk emails
+app.post('/api/email/bulk', requireAdmin, async (req, res) => {
+  const { recipients, templateData, delayMs } = req.body;
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return res.status(400).json({ success: false, error: 'Recipients array is required' });
+  }
+  const results = await emailSender.sendBulk(recipients, templateData || {}, delayMs || 1000);
+  res.json({ success: true, results });
+});
+
+// Preview email template
+app.post('/api/email/preview', requireAdmin, (req, res) => {
+  const html = emailSender.generateTikTokAlertHTML({ ...req.body, baseUrl: BASE_URL });
+  res.json({ html });
+});
+
+// Get email send history
+app.get('/api/email/logs', requireAdmin, (req, res) => {
+  const logFile = path.join(__dirname, 'email-log.json');
+  if (!fs.existsSync(logFile)) return res.json([]);
+  try { res.json(JSON.parse(fs.readFileSync(logFile, 'utf8'))); }
+  catch (e) { res.json([]); }
+});
+
+// Clear email logs
+app.delete('/api/email/logs', requireAdmin, (req, res) => {
+  const logFile = path.join(__dirname, 'email-log.json');
+  if (fs.existsSync(logFile)) fs.unlinkSync(logFile);
+  res.json({ success: true });
+});
+
 // 404
 app.use((req, res) => {
   res.redirect('/');
@@ -149,5 +231,7 @@ app.listen(PORT, () => {
   });
   console.log(`    http://localhost:${PORT}/admin                  → admin.html (🔒 protected)`);
   console.log(`    http://localhost:${PORT}/admin/login             → admin-login.html`);
-  console.log(`\n  Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}\n`);
+  console.log(`    http://localhost:${PORT}/admin/email             → email-composer.html (🔒 protected)`);
+  console.log(`\n  Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
+  console.log(`  SMTP: ${emailSender.getConfig().host}:${emailSender.getConfig().port} (${emailSender.getConfig().user || 'not configured'})\n`);
 });

