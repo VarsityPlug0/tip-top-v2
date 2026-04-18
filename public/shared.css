@@ -336,3 +336,142 @@ footer {
   border-bottom-color: #fff;
 }
 .tab:hover { color: rgba(255,255,255,.8); }
+
+/* ── Responsive Design ─────────────────────────── */
+
+/* Tablet */
+@media (max-width: 768px) {
+  header {
+    padding: 0 16px;
+    height: 56px;
+  }
+  .logo {
+    font-size: 18px;
+  }
+  .feedback-btn {
+    font-size: 13px;
+  }
+  main {
+    padding-top: 48px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  .card {
+    max-width: 90%;
+  }
+  footer {
+    padding: 14px 16px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  header {
+    padding: 0 12px;
+    height: 52px;
+  }
+  .logo {
+    font-size: 16px;
+    gap: 6px;
+  }
+  .logo svg {
+    width: 28px;
+    height: 28px;
+  }
+  .feedback-btn {
+    font-size: 12px;
+    gap: 4px;
+  }
+  .feedback-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  main {
+    padding-top: 40px;
+    padding-bottom: 30px;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+  .card {
+    max-width: 95%;
+    padding: 0 4px;
+  }
+  .login-btn {
+    height: 44px;
+    font-size: 14px;
+  }
+  .input-field,
+  .country-select,
+  .send-code-btn {
+    height: 40px;
+    font-size: 14px;
+  }
+  .btn-primary {
+    height: 42px;
+    font-size: 15px;
+  }
+  .tabs {
+    margin-bottom: 20px;
+  }
+  .tab {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  .account-row {
+    margin-top: 40px;
+    font-size: 14px;
+  }
+  .terms {
+    font-size: 11px;
+    margin-top: 24px;
+  }
+  footer {
+    padding: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .lang-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  .copyright {
+    font-size: 12px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  header {
+    padding: 0 10px;
+    height: 48px;
+  }
+  .logo {
+    font-size: 15px;
+  }
+  .feedback-btn span {
+    display: none;
+  }
+  main {
+    padding-top: 32px;
+  }
+  h1 {
+    font-size: 22px;
+  }
+  .card {
+    max-width: 100%;
+  }
+  .input-group {
+    margin-bottom: 12px;
+  }
+  .account-row {
+    margin-top: 32px;
+  }
+}

