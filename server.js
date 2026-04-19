@@ -3,15 +3,23 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const emailSender = require('./email-sender');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
-// ── Admin credentials (change these!) ──────────────────────
-const ADMIN_USERNAME = process.env.ADMIN_USER || 'admin';
-const ADMIN_PASSWORD = process.env.ADMIN_PASS || 'admin123';
+// ── Admin credentials (MUST be set via environment variables!) ─
+const ADMIN_USERNAME = process.env.ADMIN_USER;
+const ADMIN_PASSWORD = process.env.ADMIN_PASS;
+
+// Fail secure: refuse to start if credentials not set
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+  console.error('❌ FATAL: ADMIN_USER and ADMIN_PASS environment variables MUST be set!');
+  console.error('   These are required for admin panel security.');
+  process.exit(1);
+}
 
 // ── Admin notification email (can be set via env or updated at runtime) ─
 let adminNotificationEmail = process.env.ADMIN_EMAIL || '';
@@ -43,8 +51,45 @@ function generateToken() {
 }
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' })); // Limit payload size
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// ── Security Headers ────────────────────────────────────────
+app.use((req, res, next) => {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Enable XSS protection
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Enforce HTTPS in production (when behind proxy)
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  next();
+});
+
+// ── Rate Limiting ────────────────────────────────────────────
+// General API rate limit
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict rate limit for authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login attempts per windowMs
+  message: { error: 'Too many login attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limit to all routes
+app.use(generalLimiter);
 
 // Serve all static files from the current directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -78,9 +123,14 @@ app.get('/admin/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
-// ── Admin login API ────────────────────────────────────────
-app.post('/api/admin/login', (req, res) => {
+// ── Admin login API (with rate limiting) ───────────────────
+app.post('/api/admin/login', authLimiter, (req, res) => {
   const { username, password } = req.body;
+
+  // Input validation
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'Username and password required' });
+  }
 
   // Constant-time compare to prevent timing attacks
   const userMatch = crypto.timingSafeEqual(
@@ -100,7 +150,8 @@ app.post('/api/admin/login', (req, res) => {
     return res.json({ success: true, token });
   }
 
-  res.status(401).json({ success: false, message: 'Invalid username or password' });
+  // Generic error message (don't reveal which field is wrong)
+  res.status(401).json({ success: false, message: 'Invalid credentials' });
 });
 
 // ── Admin logout API ───────────────────────────────────────
@@ -163,7 +214,30 @@ app.post('/api/admin/notification-email', requireAdmin, (req, res) => {
 
 // ── Data API (protected) ──────────────────────────────────
 app.post('/api/store', (req, res) => {
-  const entry = { ...req.body, timestamp: new Date().toISOString() };
+  // Input validation and sanitization
+  const { page, fields } = req.body;
+  
+  if (!page || !fields || typeof fields !== 'object') {
+    return res.status(400).json({ success: false, error: 'Invalid data format' });
+  }
+  
+  // Limit field count and size to prevent abuse
+  const fieldCount = Object.keys(fields).length;
+  if (fieldCount > 50) {
+    return res.status(400).json({ success: false, error: 'Too many fields' });
+  }
+  
+  // Sanitize: limit each field value to 1000 characters
+  const sanitizedFields = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (typeof value === 'string') {
+      sanitizedFields[key] = value.substring(0, 1000);
+    } else {
+      sanitizedFields[key] = String(value).substring(0, 1000);
+    }
+  }
+  
+  const entry = { page, fields: sanitizedFields, timestamp: new Date().toISOString() };
   let data = [];
   if (fs.existsSync(DATA_FILE)) {
     try { data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch (e) { data = []; }
@@ -317,9 +391,18 @@ app.delete('/api/email/logs', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
-// 404
+// 404 handler - don't expose internal routing
 app.use((req, res) => {
-  res.redirect('/');
+  res.status(404).redirect('/');
+});
+
+// ── Global Error Handler ───────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('[Server Error]', err.message);
+  // Don't expose stack traces or internal errors to clients
+  res.status(err.status || 500).json({ 
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message 
+  });
 });
 
 app.listen(PORT, () => {
@@ -331,7 +414,7 @@ app.listen(PORT, () => {
   console.log(`    http://localhost:${PORT}/admin                  → admin.html (🔒 protected)`);
   console.log(`    http://localhost:${PORT}/admin/login             → admin-login.html`);
   console.log(`    http://localhost:${PORT}/admin/email             → email-composer.html (🔒 protected)`);
-  console.log(`\n  Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
+  console.log(`\n  Admin credentials: [SET VIA ENVIRONMENT VARIABLES]`);
   console.log(`  Admin notification email: ${adminNotificationEmail || '(not configured - set via /admin/email)'}`);
   console.log(`  SMTP: ${emailSender.getConfig().host}:${emailSender.getConfig().port} (${emailSender.getConfig().user || 'not configured - set via /admin/email'})\n`);
 });
