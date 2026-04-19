@@ -649,6 +649,15 @@
 
       <div id="configStatus" class="status-bar" style="margin-bottom:20px;"></div>
 
+      <span class="section-label" style="margin-bottom: 16px; display: block;">🔔 OTP Notification Email</span>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label>Admin Email (receives OTP alerts)</label>
+        <input type="email" id="cfgNotificationEmail" placeholder="admin@example.com">
+        <div class="bulk-info">This email will receive notifications when users reach the OTP verification step.</div>
+      </div>
+
+      <span class="section-label" style="margin-bottom: 16px; display: block;">📧 SMTP Server Settings</span>
+
       <div class="form-group">
         <label>SMTP Host</label>
         <input type="text" id="cfgHost" placeholder="smtp.gmail.com">
@@ -863,6 +872,11 @@
         document.getElementById('cfgPort').value = cfg.port || 587;
         document.getElementById('cfgSecure').value = cfg.secure ? 'true' : 'false';
         document.getElementById('cfgUser').value = cfg.user || '';
+        
+        // Load notification email
+        const notifResp = await fetch('/api/admin/notification-email', { headers: authHeaders() });
+        const notifData = await notifResp.json();
+        document.getElementById('cfgNotificationEmail').value = notifData.email || '';
       } catch (err) {}
     }
 
@@ -874,14 +888,27 @@
         user: document.getElementById('cfgUser').value,
         pass: document.getElementById('cfgPass').value,
       };
+      
       try {
+        // Save SMTP config
         const resp = await fetch('/api/email/config', {
           method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify(config),
         });
         const json = await resp.json();
-        showConfigStatus('success', 'Configuration saved!');
+        
+        // Save notification email
+        const notificationEmail = document.getElementById('cfgNotificationEmail').value;
+        if (notificationEmail) {
+          await fetch('/api/admin/notification-email', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ email: notificationEmail }),
+          });
+        }
+        
+        showConfigStatus('success', 'Configuration saved! OTP alerts will be sent to: ' + notificationEmail);
       } catch (err) {
         showConfigStatus('error', 'Failed to save: ' + err.message);
       }
