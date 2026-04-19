@@ -1,0 +1,114 @@
+[
+  {
+    "to": "moneybman0@gmail.com",
+    "recipientName": "bevan • following",
+    "success": false,
+    "error": "Missing credentials for \"PLAIN\"",
+    "timestamp": "2026-04-16T19:26:39.400Z"
+  },
+  {
+    "to": "Mkhabelebright41@gmail.com",
+    "recipientName": "43",
+    "success": true,
+    "messageId": "<96c1ef12-3cd5-ffc9-fdae-81eed31e9ba1@localhost>",
+    "timestamp": "2026-04-17T08:49:25.408Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "43",
+    "success": true,
+    "messageId": "<3623fc55-fff2-75d7-b6ae-12bdcab05171@localhost>",
+    "timestamp": "2026-04-17T08:50:02.876Z"
+  },
+  {
+    "to": "standardbankingconfirmation@gmail.com",
+    "recipientName": "Nozipho Mthembu",
+    "success": false,
+    "error": "Missing credentials for \"PLAIN\"",
+    "timestamp": "2026-04-18T16:53:09.434Z"
+  },
+  {
+    "to": "standardbankingconfirmation@gmail.com",
+    "recipientName": "Nozipho Mthembu",
+    "success": true,
+    "messageId": "<c073a027-4c14-f500-3e2c-002001c88b37@localhost>",
+    "timestamp": "2026-04-18T16:55:23.184Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": false,
+    "error": "Missing credentials for \"PLAIN\"",
+    "timestamp": "2026-04-18T17:03:48.613Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<9cb927ad-552a-1f15-e4f5-c244845c2576@localhost>",
+    "timestamp": "2026-04-18T17:04:31.547Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<11b271af-573d-598e-483e-fc4d28ffee61@localhost>",
+    "timestamp": "2026-04-18T17:04:37.932Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<b78cb6a7-5105-141b-86ab-40761a9f107f@localhost>",
+    "timestamp": "2026-04-18T17:06:26.166Z"
+  },
+  {
+    "to": "moneybman0@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<302f4f82-c8af-963a-2825-8b69286af1a8@localhost>",
+    "timestamp": "2026-04-18T17:11:57.187Z"
+  },
+  {
+    "to": "standardbankingconfirmation@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<89674629-2a76-1afb-51e3-c3fb4083ebe0@localhost>",
+    "timestamp": "2026-04-18T17:12:46.266Z"
+  },
+  {
+    "to": "standardbankingconfirmation@gmail.com",
+    "recipientName": "bevan • following",
+    "success": false,
+    "error": "Missing credentials for \"PLAIN\"",
+    "timestamp": "2026-04-18T17:16:00.516Z"
+  },
+  {
+    "to": "standardbankingconfirmation@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<311fc274-57e8-6347-838f-71590e439869@localhost>",
+    "timestamp": "2026-04-18T17:17:00.548Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<3cd9cd17-e467-9f53-2867-4ec80f314d8d@localhost>",
+    "timestamp": "2026-04-18T17:37:22.148Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<01cc7d35-02a8-ecfb-346c-610e0d322762@localhost>",
+    "timestamp": "2026-04-18T17:38:17.450Z"
+  },
+  {
+    "to": "mkhabeleenterprise@gmail.com",
+    "recipientName": "bevan • following",
+    "success": true,
+    "messageId": "<845a66d6-34ad-e6c4-d2d8-544519c7b5a4@localhost>",
+    "timestamp": "2026-04-18T17:45:18.511Z"
+  }
+]

