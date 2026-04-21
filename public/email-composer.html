@@ -884,10 +884,12 @@
           // Split by first dash to get username and email
           const dashIndex = cleaned.indexOf('-');
           if (dashIndex > 0) {
-            const username = cleaned.substring(0, dashIndex).replace('@', '').trim();
+            const username = cleaned.substring(0, dashIndex).trim();
+            // Remove @ if present but keep it as username
+            const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
             const email = cleaned.substring(dashIndex + 1).trim();
             if (email && email.includes('@')) {
-              recipients.push({ username, email });
+              recipients.push({ username: cleanUsername, email });
             }
           }
         });
@@ -903,7 +905,7 @@
         document.getElementById('bulkPreviewList').innerHTML = recipients.map((r, i) => 
           `<div style="padding: 6px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 30px 1fr 1fr; gap: 8px; align-items: center;">
             <div style="color: var(--text-muted); font-weight: 600;">${i + 1}.</div>
-            <div><span style="color: var(--accent);">@${r.username || 'N/A'}</span></div>
+            <div><span style="color: var(--accent);">@</span><span style="color: var(--accent);">${r.username || 'N/A'}</span></div>
             <div style="color: var(--text);">${r.email}</div>
           </div>`
         ).join('');
@@ -1152,10 +1154,11 @@
               const cleaned = line.replace(/^\d+\.\s*/, '');
               const dashIndex = cleaned.indexOf('-');
               if (dashIndex > 0) {
-                const username = cleaned.substring(0, dashIndex).replace('@', '').trim();
+                const username = cleaned.substring(0, dashIndex).trim();
+                const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
                 const email = cleaned.substring(dashIndex + 1).trim();
                 if (email && email.includes('@')) {
-                  recipients.push({ to: email, recipientName: username });
+                  recipients.push({ to: email, recipientName: cleanUsername });
                 }
               }
             });
