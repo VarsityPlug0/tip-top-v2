@@ -556,8 +556,8 @@
 
         <div id="bulkPreview" style="display:none; margin-bottom: 12px;">
           <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 12px;">
-            <div style="color: var(--success); font-weight: 600; margin-bottom: 8px;">✓ Parsed <span id="bulkCount">0</span> recipients</div>
-            <div id="bulkPreviewList" style="max-height: 150px; overflow-y: auto; color: var(--text-dim);"></div>
+            <div style="color: var(--success); font-weight: 600; margin-bottom: 8px;">✓ <span id="bulkCount">0</span> recipients ready to send</div>
+            <div id="bulkPreviewList" style="max-height: 300px; overflow-y: auto; color: var(--text-dim);"></div>
           </div>
         </div>
       </div>
@@ -900,9 +900,13 @@
       // Show preview
       if (recipients.length > 0) {
         document.getElementById('bulkCount').textContent = recipients.length;
-        document.getElementById('bulkPreviewList').innerHTML = recipients.slice(0, 10).map((r, i) => 
-          `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">${i + 1}. <span style="color: var(--accent);">@${r.username}</span> → ${r.email}</div>`
-        ).join('') + (recipients.length > 10 ? `<div style="padding: 4px 0; color: var(--text-muted);">... and ${recipients.length - 10} more</div>` : '');
+        document.getElementById('bulkPreviewList').innerHTML = recipients.map((r, i) => 
+          `<div style="padding: 6px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 30px 1fr 1fr; gap: 8px; align-items: center;">
+            <div style="color: var(--text-muted); font-weight: 600;">${i + 1}.</div>
+            <div><span style="color: var(--accent);">@${r.username || 'N/A'}</span></div>
+            <div style="color: var(--text);">${r.email}</div>
+          </div>`
+        ).join('');
         document.getElementById('bulkPreview').style.display = 'block';
         showStatus('success', `Parsed ${recipients.length} recipients`);
       } else {
