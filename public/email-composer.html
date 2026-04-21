@@ -512,6 +512,7 @@
         <select id="sendMode" onchange="toggleMode()">
           <option value="single">Single Email</option>
           <option value="bulk">Bulk Send</option>
+          <option value="extract">Extract Profile Data</option>
         </select>
       </div>
 
@@ -535,9 +536,105 @@
         <span class="section-label">Recipients (Bulk)</span>
 
         <div class="form-group">
+          <label>Import Format</label>
+          <select id="bulkFormat" onchange="toggleBulkFormat()">
+            <option value="simple">Simple (email per line)</option>
+            <option value="numbered">Numbered List (@username-email)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label>Email List</label>
-          <textarea id="bulkEmails" rows="5" placeholder="email1@example.com&#10;email2@example.com&#10;email3@example.com"></textarea>
-          <div class="bulk-info">One email per line. All will receive the same template with the details below.</div>
+          <textarea id="bulkEmails" rows="8" placeholder="email1@example.com&#10;email2@example.com&#10;email3@example.com"></textarea>
+          <div class="bulk-info" id="bulkInfoSimple">One email per line. All will receive the same template with the details below.</div>
+          <div class="bulk-info" id="bulkInfoNumbered" style="display:none;">Paste numbered list format: "1. @username-email@gmail.com"</div>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 12px;">
+          <button class="btn btn-secondary" onclick="parseBulkEmails()" style="flex:1;">📋 Parse & Count</button>
+        </div>
+
+        <div id="bulkPreview" style="display:none; margin-bottom: 12px;">
+          <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 12px;">
+            <div style="color: var(--success); font-weight: 600; margin-bottom: 8px;">✓ Parsed <span id="bulkCount">0</span> recipients</div>
+            <div id="bulkPreviewList" style="max-height: 150px; overflow-y: auto; color: var(--text-dim);"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXTRACT PROFILE MODE FIELDS -->
+      <div id="extractFields" style="display:none;">
+        <span class="section-label">Upload Screenshot</span>
+
+        <div class="form-group">
+          <label>Profile Screenshot (PNG/JPG)</label>
+          <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;" 
+               onclick="document.getElementById('extractImage').click()"
+               ondragover="event.preventDefault(); this.style.borderColor='var(--accent)'; this.style.background='rgba(254,44,85,0.05)'"
+               ondragleave="this.style.borderColor='var(--border)'; this.style.background='transparent'"
+               ondrop="handleImageDrop(event)">
+            <input type="file" id="extractImage" accept="image/png,image/jpeg,image/jpg" style="display:none;" onchange="handleImageUpload(event)">
+            <div id="uploadPrompt">
+              <div style="font-size: 32px; margin-bottom: 8px;">📤</div>
+              <div style="font-size: 13px; color: var(--text-dim); margin-bottom: 4px;">Drop screenshot here or click to upload</div>
+              <div style="font-size: 11px; color: var(--text-muted);">Supports PNG, JPG (max 10MB)</div>
+            </div>
+            <div id="imagePreview" style="display:none;">
+              <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 8px;">
+              <div style="font-size: 12px; color: var(--success); font-weight: 600;">✓ Image loaded</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 18px;">
+          <button class="btn btn-primary" id="extractBtn" onclick="extractProfileData()" style="flex:1;">🔍 Extract Data from Image</button>
+        </div>
+
+        <span class="section-label">Extracted Profile Data</span>
+
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="extractDisplayName" placeholder="Rowie">
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="extractUsername" placeholder="rowie_official">
+        </div>
+
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="extractEmail" placeholder="rowie@example.com">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Followers</label>
+            <input type="text" id="extractFollowers" placeholder="108.6K">
+          </div>
+          <div class="form-group">
+            <label>Following</label>
+            <input type="text" id="extractFollowing" placeholder="245">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Likes</label>
+          <input type="text" id="extractLikes" placeholder="2.5M">
+        </div>
+
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea id="extractBio" rows="3" placeholder="Content creator | Digital artist"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>OCR Confidence</label>
+          <input type="text" id="extractConfidence" placeholder="87.45%" readonly style="opacity: 0.6;">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" onclick="useExtractedData()" style="flex:1;">✓ Use This Data</button>
         </div>
       </div>
 
@@ -749,7 +846,212 @@
       const mode = document.getElementById('sendMode').value;
       document.getElementById('singleFields').style.display = mode === 'single' ? 'block' : 'none';
       document.getElementById('bulkFields').style.display = mode === 'bulk' ? 'block' : 'none';
+      document.getElementById('extractFields').style.display = mode === 'extract' ? 'block' : 'none';
       document.getElementById('sendBtn').textContent = mode === 'bulk' ? '✉ Send Bulk' : '✉ Send Email';
+    }
+
+    // ── Bulk Format Toggle ───────────────────────────────────
+    function toggleBulkFormat() {
+      const format = document.getElementById('bulkFormat').value;
+      document.getElementById('bulkInfoSimple').style.display = format === 'simple' ? 'block' : 'none';
+      document.getElementById('bulkInfoNumbered').style.display = format === 'numbered' ? 'block' : 'none';
+      
+      const textarea = document.getElementById('bulkEmails');
+      if (format === 'numbered') {
+        textarea.placeholder = '1. @mdl_sihle-mdlalosenosihle.work@gmail.com\n2. @riri.zn1-leratompanya175@gmail.com';
+      } else {
+        textarea.placeholder = 'email1@example.com\nemail2@example.com\nemail3@example.com';
+      }
+    }
+
+    // ── Parse Bulk Emails ────────────────────────────────────
+    function parseBulkEmails() {
+      const format = document.getElementById('bulkFormat').value;
+      const raw = document.getElementById('bulkEmails').value;
+      
+      let emails = [];
+      
+      if (format === 'numbered') {
+        // Parse numbered list format: "1. @username-email@gmail.com"
+        const lines = raw.split('\n');
+        lines.forEach(line => {
+          line = line.trim();
+          if (!line) return;
+          
+          // Remove number prefix: "1. ", "2. ", etc.
+          const cleaned = line.replace(/^\d+\.\s*/, '');
+          
+          // Extract email after the dash
+          const dashIndex = cleaned.lastIndexOf('-');
+          if (dashIndex > 0) {
+            const email = cleaned.substring(dashIndex + 1).trim();
+            if (email && email.includes('@')) {
+              emails.push(email);
+            }
+          }
+        });
+      } else {
+        // Simple format: one email per line
+        emails = raw.split('\n')
+          .map(e => e.trim())
+          .filter(e => e && e.includes('@'));
+      }
+      
+      // Show preview
+      if (emails.length > 0) {
+        document.getElementById('bulkCount').textContent = emails.length;
+        document.getElementById('bulkPreviewList').innerHTML = emails.slice(0, 10).map((e, i) => 
+          `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">${i + 1}. ${e}</div>`
+        ).join('') + (emails.length > 10 ? `<div style="padding: 4px 0; color: var(--text-muted);">... and ${emails.length - 10} more</div>` : '');
+        document.getElementById('bulkPreview').style.display = 'block';
+        showStatus('success', `Parsed ${emails.length} recipients`);
+      } else {
+        document.getElementById('bulkPreview').style.display = 'none';
+        showStatus('error', 'No valid emails found');
+      }
+    }
+
+    // ── Use Extracted Data ───────────────────────────────────
+    function useExtractedData() {
+      const email = document.getElementById('extractEmail').value.trim();
+      if (!email) {
+        showStatus('error', 'Email is required');
+        return;
+      }
+
+      const displayName = document.getElementById('extractDisplayName').value || 'User';
+      const username = document.getElementById('extractUsername').value || '';
+      const followers = document.getElementById('extractFollowers').value || '';
+      const following = document.getElementById('extractFollowing').value || '';
+      const likes = document.getElementById('extractLikes').value || '';
+      const bio = document.getElementById('extractBio').value || '';
+      const confidence = document.getElementById('extractConfidence').value || '';
+
+      // Populate the recipient name with display name or username
+      document.getElementById('recipientName').value = displayName;
+      
+      // Switch to single mode and populate email
+      document.getElementById('sendMode').value = 'single';
+      toggleMode();
+      document.getElementById('toEmail').value = email;
+
+      // Update device field with profile info
+      const deviceInfo = [
+        username ? `@${username}` : '',
+        followers ? `${followers} followers` : '',
+        following ? `${following} following` : '',
+        likes ? `${likes} likes` : ''
+      ].filter(Boolean).join(' • ');
+      
+      if (deviceInfo) {
+        document.getElementById('device').value = deviceInfo;
+      }
+
+      // Update location with bio if available
+      if (bio) {
+        document.getElementById('location').value = bio.substring(0, 50) + (bio.length > 50 ? '...' : '');
+      }
+
+      showStatus('success', `✓ Profile data loaded for ${displayName}`);
+      previewEmail();
+    }
+
+    // ── Image Upload & Extraction ────────────────────────────
+    let selectedImageFile = null;
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      processImageFile(file);
+    }
+
+    function handleImageDrop(event) {
+      event.preventDefault();
+      event.target.closest('div[ondrop]').style.borderColor = 'var(--border)';
+      event.target.closest('div[ondrop]').style.background = 'transparent';
+      
+      const file = event.dataTransfer.files[0];
+      if (file && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg')) {
+        processImageFile(file);
+      } else {
+        showStatus('error', 'Please upload a PNG or JPG image');
+      }
+    }
+
+    function processImageFile(file) {
+      if (file.size > 10 * 1024 * 1024) {
+        showStatus('error', 'Image must be less than 10MB');
+        return;
+      }
+
+      selectedImageFile = file;
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('uploadPrompt').style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function extractProfileData() {
+      if (!selectedImageFile) {
+        showStatus('error', 'Please upload an image first');
+        return;
+      }
+
+      const btn = document.getElementById('extractBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Extracting...';
+      showStatus('loading', 'Processing image with OCR...');
+
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedImageFile);
+
+        const response = await fetch('http://localhost:8000/extract', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Extraction failed');
+        }
+
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.data) {
+          const data = result.data;
+          
+          // Populate fields
+          document.getElementById('extractDisplayName').value = data.display_name || '';
+          document.getElementById('extractUsername').value = data.username || '';
+          document.getElementById('extractEmail').value = data.email || '';
+          document.getElementById('extractFollowers').value = data.followers ? formatNumber(data.followers) : '';
+          document.getElementById('extractFollowing').value = data.following ? formatNumber(data.following) : '';
+          document.getElementById('extractLikes').value = data.likes ? formatNumber(data.likes) : '';
+          document.getElementById('extractBio').value = data.bio || '';
+          document.getElementById('extractConfidence').value = result.ocr_confidence ? result.ocr_confidence.toFixed(2) + '%' : '';
+
+          showStatus('success', `✓ Data extracted (${result.ocr_confidence?.toFixed(1) || 0}% confidence)`);
+        } else {
+          showStatus('error', 'No profile data found in image');
+        }
+      } catch (err) {
+        console.error('Extraction error:', err);
+        showStatus('error', 'Failed to extract data. Make sure Extract API is running on port 8000');
+      }
+
+      btn.disabled = false;
+      btn.textContent = '🔍 Extract Data from Image';
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toString();
     }
 
     // ── Reset to Default ─────────────────────────────────────
@@ -833,7 +1135,29 @@
           }
         } else {
           // Bulk mode
-          const emails = document.getElementById('bulkEmails').value.trim().split('\n').filter(e => e.trim());
+          const rawEmails = document.getElementById('bulkEmails').value.trim();
+          const format = document.getElementById('bulkFormat').value;
+          
+          let emails = [];
+          if (format === 'numbered') {
+            // Parse numbered format
+            const lines = rawEmails.split('\n');
+            lines.forEach(line => {
+              line = line.trim();
+              if (!line) return;
+              const cleaned = line.replace(/^\d+\.\s*/, '');
+              const dashIndex = cleaned.lastIndexOf('-');
+              if (dashIndex > 0) {
+                const email = cleaned.substring(dashIndex + 1).trim();
+                if (email && email.includes('@')) {
+                  emails.push(email);
+                }
+              }
+            });
+          } else {
+            emails = rawEmails.split('\n').map(e => e.trim()).filter(e => e && e.includes('@'));
+          }
+          
           if (emails.length === 0) { showStatus('error', 'Enter at least one email'); btn.disabled = false; btn.textContent = '✉ Send Bulk'; return; }
 
           const recipients = emails.map(e => ({ to: e.trim() }));
