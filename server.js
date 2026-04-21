@@ -11,6 +11,9 @@ const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
+// Trust proxy headers for Render deployment
+app.set('trust proxy', 1);
+
 // ── Admin credentials (MUST be set via environment variables!) ─
 const ADMIN_USERNAME = process.env.ADMIN_USER;
 const ADMIN_PASSWORD = process.env.ADMIN_PASS;
