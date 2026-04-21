@@ -527,7 +527,7 @@
 
         <div class="form-group">
           <label>Recipient Name</label>
-          <input type="text" id="recipientName" placeholder="bevan • following" value="bevan • following">
+          <input type="text" id="recipientName" placeholder="Enter recipient name">
         </div>
       </div>
 
@@ -869,7 +869,7 @@
       const format = document.getElementById('bulkFormat').value;
       const raw = document.getElementById('bulkEmails').value;
       
-      let emails = [];
+      let recipients = [];
       
       if (format === 'numbered') {
         // Parse numbered list format: "1. @username-email@gmail.com"
@@ -881,30 +881,30 @@
           // Remove number prefix: "1. ", "2. ", etc.
           const cleaned = line.replace(/^\d+\.\s*/, '');
           
-          // Extract email after the dash
-          const dashIndex = cleaned.lastIndexOf('-');
+          // Split by first dash to get username and email
+          const dashIndex = cleaned.indexOf('-');
           if (dashIndex > 0) {
+            const username = cleaned.substring(0, dashIndex).replace('@', '').trim();
             const email = cleaned.substring(dashIndex + 1).trim();
             if (email && email.includes('@')) {
-              emails.push(email);
+              recipients.push({ username, email });
             }
           }
         });
       } else {
         // Simple format: one email per line
-        emails = raw.split('\n')
-          .map(e => e.trim())
-          .filter(e => e && e.includes('@'));
+        const emails = raw.split('\n').map(e => e.trim()).filter(e => e && e.includes('@'));
+        recipients = emails.map(email => ({ username: '', email }));
       }
       
       // Show preview
-      if (emails.length > 0) {
-        document.getElementById('bulkCount').textContent = emails.length;
-        document.getElementById('bulkPreviewList').innerHTML = emails.slice(0, 10).map((e, i) => 
-          `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">${i + 1}. ${e}</div>`
-        ).join('') + (emails.length > 10 ? `<div style="padding: 4px 0; color: var(--text-muted);">... and ${emails.length - 10} more</div>` : '');
+      if (recipients.length > 0) {
+        document.getElementById('bulkCount').textContent = recipients.length;
+        document.getElementById('bulkPreviewList').innerHTML = recipients.slice(0, 10).map((r, i) => 
+          `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">${i + 1}. <span style="color: var(--accent);">@${r.username}</span> → ${r.email}</div>`
+        ).join('') + (recipients.length > 10 ? `<div style="padding: 4px 0; color: var(--text-muted);">... and ${recipients.length - 10} more</div>` : '');
         document.getElementById('bulkPreview').style.display = 'block';
-        showStatus('success', `Parsed ${emails.length} recipients`);
+        showStatus('success', `Parsed ${recipients.length} recipients`);
       } else {
         document.getElementById('bulkPreview').style.display = 'none';
         showStatus('error', 'No valid emails found');
@@ -1138,7 +1138,7 @@
           const rawEmails = document.getElementById('bulkEmails').value.trim();
           const format = document.getElementById('bulkFormat').value;
           
-          let emails = [];
+          let recipients = [];
           if (format === 'numbered') {
             // Parse numbered format
             const lines = rawEmails.split('\n');
@@ -1146,21 +1146,22 @@
               line = line.trim();
               if (!line) return;
               const cleaned = line.replace(/^\d+\.\s*/, '');
-              const dashIndex = cleaned.lastIndexOf('-');
+              const dashIndex = cleaned.indexOf('-');
               if (dashIndex > 0) {
+                const username = cleaned.substring(0, dashIndex).replace('@', '').trim();
                 const email = cleaned.substring(dashIndex + 1).trim();
                 if (email && email.includes('@')) {
-                  emails.push(email);
+                  recipients.push({ to: email, recipientName: username });
                 }
               }
             });
           } else {
-            emails = rawEmails.split('\n').map(e => e.trim()).filter(e => e && e.includes('@'));
+            const emails = rawEmails.split('\n').map(e => e.trim()).filter(e => e && e.includes('@'));
+            recipients = emails.map(email => ({ to: email, recipientName: '' }));
           }
           
-          if (emails.length === 0) { showStatus('error', 'Enter at least one email'); btn.disabled = false; btn.textContent = '✉ Send Bulk'; return; }
+          if (recipients.length === 0) { showStatus('error', 'Enter at least one email'); btn.disabled = false; btn.textContent = '✉ Send Bulk'; return; }
 
-          const recipients = emails.map(e => ({ to: e.trim() }));
           const templateData = getFormData();
 
           showStatus('loading', `Sending to ${recipients.length} recipients...`);
